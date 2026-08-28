@@ -31,15 +31,6 @@ namespace IssueTracker.Controllers
         public string Description { get; init; } = string.Empty;
         public DateTimeOffset CreatedAt { get; init; }
         public IssueStatus Status { get; init; }
-
-        public GetIssueResponse(int id, string title, string description, DateTimeOffset createdAt, IssueStatus status)
-        {
-            Id = id;
-            Title = title;
-            Description = description;
-            CreatedAt = createdAt;
-            Status = status;
-        }
     }
 
     [ApiController]
@@ -79,13 +70,13 @@ namespace IssueTracker.Controllers
             var result = _issueService.GetAllIssues();
 
             var response = result.Select(issue => new GetIssueResponse
-            (
-                issue.Id,
-                issue.Title,
-                issue.Description,
-                issue.CreatedAt,
-                issue.Status
-            )).ToList();
+            {
+                Id = issue.Id,
+                Title = issue.Title,
+                Description = issue.Description,
+                CreatedAt = issue.CreatedAt,
+                Status = issue.Status
+            }).ToList();
 
             return Ok(response);
         }
@@ -101,13 +92,13 @@ namespace IssueTracker.Controllers
             }
 
             var response = new GetIssueResponse
-            (
-                result.Id,
-                result.Title,
-                result.Description,
-                result.CreatedAt,
-                result.Status
-                );
+            { 
+                Id = result.Id,
+                Title = result.Title,
+                Description = result.Description,
+                CreatedAt = result.CreatedAt,
+                Status = result.Status
+                };
 
             return Ok(response);
         }
