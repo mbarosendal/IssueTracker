@@ -1,0 +1,115 @@
+using IssueTracker.Services;
+using IssueTracker.Services.Domain;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+
+namespace IssueTracker.Controllers
+{
+    public sealed class CreateIssueRequest
+    {
+        [Required]
+        [StringLength(50, MinimumLength = 1)]
+        public string Title { get; init; } = string.Empty;
+        [Required]
+        [StringLength(500, MinimumLength = 1)]
+        public string Description { get; init; } = string.Empty;
+    }
+
+    public sealed class CreateIssueResponse
+    {
+        public int Id { get; init; }
+        public string Title { get; init; } = string.Empty;
+        public string Description { get; init; } = string.Empty;
+        public DateTimeOffset CreatedAt { get; init; }
+        public IssueStatus Status { get; init; }
+    }
+
+    public sealed class GetIssueResponse
+    {
+        public int Id { get; init; }
+        public string Title { get; init; } = string.Empty;
+        public string Description { get; init; } = string.Empty;
+        public DateTimeOffset CreatedAt { get; init; }
+        public IssueStatus Status { get; init; }
+
+        public GetIssueResponse(int id, string title, string description, DateTimeOffset createdAt, IssueStatus status)
+        {
+            Id = id;
+            Title = title;
+            Description = description;
+            CreatedAt = createdAt;
+            Status = status;
+        }
+    }
+
+    [ApiController]
+    [Route("issues")]
+    public class IssuesController(IssueService _issueService) : ControllerBase
+    {
+
+        [HttpPost()]
+        public ActionResult<CreateIssueResponse> Create(CreateIssueRequest request)
+        {
+            // mapping to input model for the service layer
+            var input = new CreateIssueInput(
+                request.Title,
+                request.Description
+            );
+
+            var result = _issueService.CreateIssue(input);
+
+            var response = new CreateIssueResponse
+            {
+                Id = result.Id,
+                Title = result.Title,
+                Description = result.Description,
+                CreatedAt = result.CreatedAt,
+                Status = result.Status
+            };
+
+            // future switch expression
+            return Created(
+                $"/issues/{response.Id}",
+                response);
+        }
+
+        [HttpGet()]
+        public ActionResult<List<GetIssueResponse>> GetAll()
+        {
+            var result = _issueService.GetAllIssues();
+
+            var response = result.Select(issue => new GetIssueResponse
+            (
+                issue.Id,
+                issue.Title,
+                issue.Description,
+                issue.CreatedAt,
+                issue.Status
+            )).ToList();
+
+            return Ok(response);
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult<GetIssueResponse> Get(int id)
+        {
+            var result = _issueService.GetById(id);
+
+            if (result is null)
+            {
+                return NotFound();
+            }
+
+            var response = new GetIssueResponse
+            (
+                result.Id,
+                result.Title,
+                result.Description,
+                result.CreatedAt,
+                result.Status
+                );
+
+            return Ok(response);
+        }
+    }
+}
