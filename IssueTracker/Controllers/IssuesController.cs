@@ -1,5 +1,5 @@
+using IssueTracker.Domain;
 using IssueTracker.Services;
-using IssueTracker.Services.Domain;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -35,7 +35,7 @@ namespace IssueTracker.Controllers
 
     [ApiController]
     [Route("issues")]
-    public class IssuesController(IssueService _issueService) : ControllerBase
+    public class IssuesController(IssueService service) : ControllerBase
     {
 
         [HttpPost()]
@@ -47,7 +47,7 @@ namespace IssueTracker.Controllers
                 request.Description
             );
 
-            var result = _issueService.CreateIssue(input);
+            var result = service.CreateIssue(input);
 
             var response = new CreateIssueResponse
             {
@@ -67,7 +67,7 @@ namespace IssueTracker.Controllers
         [HttpGet()]
         public ActionResult<List<GetIssueResponse>> GetAll()
         {
-            var result = _issueService.GetAllIssues();
+            var result = service.GetAllIssues();
 
             var response = result.Select(issue => new GetIssueResponse
             {
@@ -84,7 +84,7 @@ namespace IssueTracker.Controllers
         [HttpGet("{id}")]
         public ActionResult<GetIssueResponse> Get(int id)
         {
-            var result = _issueService.GetById(id);
+            var result = service.GetById(id);
 
             if (result is null)
             {

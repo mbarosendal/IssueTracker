@@ -1,6 +1,6 @@
 ﻿using IssueTracker.Controllers;
-using IssueTracker.Services.Domain;
-using IssueTracker.Services.Infrastructure;
+using IssueTracker.Domain;
+using IssueTracker.Infrastructure;
 
 namespace IssueTracker.Services
 {
@@ -24,7 +24,7 @@ namespace IssueTracker.Services
         IssueStatus Status);
     // could you make a IssueOutput combined here?
 
-    public sealed class IssueService(IssueStore _store)
+    public sealed class IssueService(IssueStore store)
     {
 
         public CreateIssueOutput CreateIssue(CreateIssueInput request)
@@ -39,7 +39,7 @@ namespace IssueTracker.Services
             ); 
 
             // future repository
-            _store.Add(issue);
+            store.Add(issue);
 
             var output = new CreateIssueOutput(
                 issue.Id,
@@ -54,7 +54,7 @@ namespace IssueTracker.Services
 
         public IReadOnlyList<GetIssueOutput> GetAllIssues()
         {
-            var result = _store.GetAll();
+            var result = store.GetAll();
 
             List<GetIssueOutput> outputList = new List<GetIssueOutput>();
 
@@ -76,7 +76,7 @@ namespace IssueTracker.Services
 
         public GetIssueOutput? GetById(int id)
         {
-            var result = _store.GetById(id);
+            var result = store.GetById(id);
 
             if (result is null)
             {

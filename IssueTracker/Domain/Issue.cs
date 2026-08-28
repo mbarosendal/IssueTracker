@@ -1,4 +1,4 @@
-﻿namespace IssueTracker.Services.Domain
+﻿namespace IssueTracker.Domain
 {
 
     public sealed class Issue

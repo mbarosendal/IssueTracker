@@ -1,6 +1,6 @@
-﻿using IssueTracker.Services.Domain;
+﻿using IssueTracker.Domain;
 
-namespace IssueTracker.Services.Infrastructure
+namespace IssueTracker.Infrastructure
 {
     public class IssueStore
     {

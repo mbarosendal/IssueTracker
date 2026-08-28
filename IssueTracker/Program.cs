@@ -1,6 +1,6 @@
 
+using IssueTracker.Infrastructure;
 using IssueTracker.Services;
-using IssueTracker.Services.Infrastructure;
 
 namespace IssueTracker
 {
