@@ -13,9 +13,10 @@ namespace IssueTracker
 
             // Add services to the container.
 
-            builder.Services.AddSingleton<IssueStore>();
+            builder.Services.AddScoped<IssueStore>();
             builder.Services.AddScoped<IssueService>();
             builder.Services.AddScoped<AppDbContext>();
+            builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 
             builder.Services.AddDbContext<AppDbContext>(options => 
                 options.UseSqlServer(
@@ -42,7 +43,7 @@ namespace IssueTracker
 
 
             app.MapControllers();
-
+            
             app.Run();
         }
     }

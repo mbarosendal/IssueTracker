@@ -1,6 +1,7 @@
 ﻿using IssueTracker.Controllers;
 using IssueTracker.Domain;
 using IssueTracker.Infrastructure;
+using System.Threading.Tasks;
 
 namespace IssueTracker.Services
 {
@@ -24,23 +25,22 @@ namespace IssueTracker.Services
         IssueStatus Status);
     // could you make a IssueOutput combined here?
 
-    public sealed class IssueService(IssueStore store)
+    public sealed class IssueService(IssueStore store, IUnitOfWork unitOfWork)
     {
 
-        public CreateIssueOutput CreateIssue(CreateIssueInput request)
+        public async Task<CreateIssueOutput> CreateIssue(CreateIssueInput request)
         {
             var issue = new Issue
             (
-                new Random().Next(1, 1000),
-                request.Title,
+                "request.Titlerequest.Titlerequest.Titlerequest.Titlerequest.Titlerequest.Titlerequest.Titlerequest.Titlerequest.Titlerequest.Title",
                 request.Description,
                 DateTimeOffset.UtcNow,
                 IssueStatus.Open
             ); 
 
-            // future repository
             store.Add(issue);
 
+            // is not taking the output from the created? is assumption that exceptions wouldnt let output be made this way?
             var output = new CreateIssueOutput(
                 issue.Id,
                 issue.Title,
@@ -48,6 +48,8 @@ namespace IssueTracker.Services
                 issue.CreatedAt,
                 issue.Status
             );
+
+            await unitOfWork.SaveChangesAsync();
 
             return output;
         }

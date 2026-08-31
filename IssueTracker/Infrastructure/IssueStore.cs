@@ -1,24 +1,30 @@
 ﻿using IssueTracker.Domain;
+using System.Security.Cryptography.Xml;
 
 namespace IssueTracker.Infrastructure
 {
     public class IssueStore
     {
-        private readonly List<Issue> _issues = new List<Issue>();
+        private AppDbContext _dbContext;
+
+        public IssueStore(AppDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
 
         public void Add(Issue issue)
         {
-            _issues.Add(issue);
+            _dbContext.Add(issue);
         }
 
         public List<Issue> GetAll()
         {
-            return _issues.ToList();
+            return _dbContext.Issues.ToList();
         }
 
         public Issue? GetById(int id)
         {
-            return _issues.FirstOrDefault(i => i.Id == id);
+            return _dbContext.Issues.FirstOrDefault(i => i.Id == id);
         }
     }
 }

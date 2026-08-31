@@ -2,6 +2,7 @@ using IssueTracker.Domain;
 using IssueTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 
 namespace IssueTracker.Controllers
 {
@@ -39,7 +40,7 @@ namespace IssueTracker.Controllers
     {
 
         [HttpPost()]
-        public ActionResult<CreateIssueResponse> Create(CreateIssueRequest request)
+        public async Task<ActionResult<CreateIssueResponse>> Create(CreateIssueRequest request)
         {
             // mapping to input model for the service layer
             var input = new CreateIssueInput(
@@ -47,21 +48,29 @@ namespace IssueTracker.Controllers
                 request.Description
             );
 
-            var result = service.CreateIssue(input);
-
-            var response = new CreateIssueResponse
+            try
             {
-                Id = result.Id,
-                Title = result.Title,
-                Description = result.Description,
-                CreatedAt = result.CreatedAt,
-                Status = result.Status
-            };
+                var result = await service.CreateIssue(input);
 
-            // future switch expression
-            return Created(
-                $"/issues/{response.Id}",
-                response);
+                var response = new CreateIssueResponse
+                {
+                    Id = result.Id,
+                    Title = result.Title,
+                    Description = result.Description,
+                    CreatedAt = result.CreatedAt,
+                    Status = result.Status
+                };
+
+                // future switch expression
+                return Created(
+                    $"/issues/{response.Id}",
+                    response);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
         [HttpGet()]
