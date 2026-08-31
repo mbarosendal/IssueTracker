@@ -24,21 +24,19 @@ namespace IssueTracker.Services
         IssueStatus Status);
     // could you make a IssueOutput combined here?
 
-    public sealed class IssueService(IssueStore store)
+    public sealed class IssueService(IssueStore store, IUnitOfWork unitOfWork)
     {
 
-        public CreateIssueOutput CreateIssue(CreateIssueInput request)
+        public async Task<CreateIssueOutput> CreateIssue(CreateIssueInput request)
         {
             var issue = new Issue
             (
-                new Random().Next(1, 1000),
                 request.Title,
                 request.Description,
                 DateTimeOffset.UtcNow,
                 IssueStatus.Open
             ); 
 
-            // future repository
             store.Add(issue);
 
             var output = new CreateIssueOutput(
@@ -49,6 +47,8 @@ namespace IssueTracker.Services
                 issue.Status
             );
 
+            await unitOfWork.SaveChangesAsync();
+
             return output;
         }
 
@@ -56,7 +56,7 @@ namespace IssueTracker.Services
         {
             var result = store.GetAll();
 
-            List<GetIssueOutput> outputList = new List<GetIssueOutput>();
+            List<GetIssueOutput> outputList = new();
 
             foreach (var issue in result)
             {

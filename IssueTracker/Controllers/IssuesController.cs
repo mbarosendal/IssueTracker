@@ -39,7 +39,7 @@ namespace IssueTracker.Controllers
     {
 
         [HttpPost()]
-        public ActionResult<CreateIssueResponse> Create(CreateIssueRequest request)
+        public async Task<ActionResult<CreateIssueResponse>> Create(CreateIssueRequest request)
         {
             // mapping to input model for the service layer
             var input = new CreateIssueInput(
@@ -47,7 +47,7 @@ namespace IssueTracker.Controllers
                 request.Description
             );
 
-            var result = service.CreateIssue(input);
+            var result = await service.CreateIssue(input);
 
             var response = new CreateIssueResponse
             {
@@ -92,13 +92,13 @@ namespace IssueTracker.Controllers
             }
 
             var response = new GetIssueResponse
-            { 
+            {
                 Id = result.Id,
                 Title = result.Title,
                 Description = result.Description,
                 CreatedAt = result.CreatedAt,
                 Status = result.Status
-                };
+            };
 
             return Ok(response);
         }

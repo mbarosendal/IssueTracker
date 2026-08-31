@@ -2,23 +2,22 @@
 
 namespace IssueTracker.Infrastructure
 {
-    public class IssueStore
+    public class IssueStore(AppDbContext _dbContext)
     {
-        private readonly List<Issue> _issues = new List<Issue>();
 
-        public void Add(Issue issue)
+        public async void Add(Issue issue)
         {
-            _issues.Add(issue);
+            _dbContext.Add(issue);
         }
 
         public List<Issue> GetAll()
         {
-            return _issues.ToList();
+            return _dbContext.Issues.ToList();
         }
 
         public Issue? GetById(int id)
         {
-            return _issues.FirstOrDefault(i => i.Id == id);
+            return _dbContext.Issues.FirstOrDefault(i => i.Id == id);
         }
     }
 }

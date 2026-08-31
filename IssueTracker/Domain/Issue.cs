@@ -1,21 +1,12 @@
 ﻿namespace IssueTracker.Domain
 {
 
-    public sealed class Issue
+    public sealed class Issue(string title, string description, DateTimeOffset createdAt, IssueStatus status)
     {
         public int Id { get; init; }
-        public string Title { get; init; } = string.Empty;
-        public string Description { get; init; } = string.Empty;
-        public DateTimeOffset CreatedAt { get; init; }
-        public IssueStatus Status { get; init; }
-
-        public Issue(int id, string title, string description, DateTimeOffset createdAt, IssueStatus status)
-        {
-            Id = id;
-            Title = title;
-            Description = description;
-            CreatedAt = createdAt;
-            Status = status;
-        }
+        public string Title { get; init; } = title;
+        public string Description { get; init; } = description;
+        public DateTimeOffset CreatedAt { get; init; } = createdAt;
+        public IssueStatus Status { get; init; } = status;
     }
 }
