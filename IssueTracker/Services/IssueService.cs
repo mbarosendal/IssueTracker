@@ -1,6 +1,7 @@
 ﻿using IssueTracker.Controllers;
 using IssueTracker.Domain;
 using IssueTracker.Infrastructure;
+using System.Threading.Tasks;
 
 namespace IssueTracker.Services
 {
@@ -39,6 +40,7 @@ namespace IssueTracker.Services
 
             store.Add(issue);
 
+            // is not taking the output from the created? is assumption that exceptions wouldnt let output be made this way?
             var output = new CreateIssueOutput(
                 issue.Id,
                 issue.Title,

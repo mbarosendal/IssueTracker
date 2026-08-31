@@ -1,4 +1,5 @@
 ﻿using IssueTracker.Domain;
+using System.Security.Cryptography.Xml;
 
 namespace IssueTracker.Infrastructure
 {

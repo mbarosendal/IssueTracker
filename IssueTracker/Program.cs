@@ -43,7 +43,7 @@ namespace IssueTracker
 
 
             app.MapControllers();
-
+            
             app.Run();
         }
     }
