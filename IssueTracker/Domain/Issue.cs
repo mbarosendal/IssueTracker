@@ -12,13 +12,5 @@ namespace IssueTracker.Domain
         public string Description { get; init; }
         public DateTimeOffset CreatedAt { get; init; }
         public IssueStatus Status { get; init; }
-
-        public Issue(string title, string description, DateTimeOffset createdAt, IssueStatus status)
-        {
-            Title = title;
-            Description = description;
-            CreatedAt = createdAt;
-            Status = status;
-        }
     }
 }

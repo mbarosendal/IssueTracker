@@ -63,12 +63,6 @@ namespace IssueTracker.Controllers
                 return Created(
                     $"/issues/{response.Id}",
                     response);
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
         }
 
         [HttpGet()]
