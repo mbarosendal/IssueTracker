@@ -1,6 +1,8 @@
 
+using IssueTracker.ExceptionHandling;
 using IssueTracker.Infrastructure;
 using IssueTracker.Services;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 namespace IssueTracker
@@ -22,6 +24,8 @@ namespace IssueTracker
                 options.UseSqlServer(
                     builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            builder.Services.AddExceptionHandler<MyExceptionHandler>();
+            builder.Services.AddProblemDetails();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -36,11 +40,11 @@ namespace IssueTracker
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseExceptionHandler();
 
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
             

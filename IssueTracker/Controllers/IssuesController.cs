@@ -2,6 +2,7 @@ using IssueTracker.Domain;
 using IssueTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace IssueTracker.Controllers
@@ -62,6 +63,15 @@ namespace IssueTracker.Controllers
     public class IssuesController(IssueService service) : ControllerBase
     {
 
+        [HttpGet("/problems/{id}")]
+        public ActionResult<string> FailureTest(int id)
+        {
+            if (id == 0)
+                throw new Exception("This is a test exception to demonstrate the global exception handling middleware.");
+
+            return Ok("Its ok");
+        }
+
         [HttpPost()]
         public async Task<ActionResult<CreateIssueResponse>> CreateAsync(CreateIssueRequest request)
         {
@@ -82,8 +92,8 @@ namespace IssueTracker.Controllers
                     Status = result.Status
                 };
 
-                // future switch expression
-                return Created(
+            // future switch expression
+            return Created(
                     $"/issues/{response.Id}",
                     response);
         }
