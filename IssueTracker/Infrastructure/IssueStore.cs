@@ -1,4 +1,5 @@
 ﻿using IssueTracker.Domain;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography.Xml;
 
 namespace IssueTracker.Infrastructure
@@ -6,19 +7,19 @@ namespace IssueTracker.Infrastructure
     public class IssueStore(AppDbContext _dbContext)
     {
 
-        public async void Add(Issue issue)
+        public async void AddAsync(Issue issue)
         {
-            _dbContext.Add(issue);
+            await _dbContext.AddAsync(issue);
         }
 
-        public List<Issue> GetAll()
+        public async Task<List<Issue>> GetAllAsync()
         {
-            return _dbContext.Issues.ToList();
+            return await _dbContext.Issues.ToListAsync();
         }
 
-        public Issue? GetById(int id)
+        public async Task<Issue?> GetByIdAsync(int id)
         {
-            return _dbContext.Issues.FirstOrDefault(i => i.Id == id);
+            return await _dbContext.Issues.FirstOrDefaultAsync(i => i.Id == id);
         }
     }
 }

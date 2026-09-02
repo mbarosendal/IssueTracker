@@ -1,6 +1,9 @@
-﻿using IssueTracker.Controllers;
+﻿using Azure;
+using IssueTracker.Controllers;
 using IssueTracker.Domain;
 using IssueTracker.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 using System.Threading.Tasks;
 
 namespace IssueTracker.Services
@@ -8,27 +11,45 @@ namespace IssueTracker.Services
 
     public sealed record CreateIssueInput(
         string Title,
-        string Description);
+        string Description
+        );
 
     public sealed record CreateIssueOutput(
         int Id,
         string Title,
         string Description,
         DateTimeOffset CreatedAt,
-        IssueStatus Status);
+        IssueStatus Status
+        );
 
     public sealed record GetIssueOutput(
         int Id,
         string Title,
         string Description,
         DateTimeOffset CreatedAt,
-        IssueStatus Status);
-    // could you make a IssueOutput combined here?
+        DateTimeOffset? UpdatedAt,
+        IssueStatus Status
+        );
+
+    public sealed record UpdateIssueInput(
+        string Title,
+        string Description,
+        IssueStatus Status
+        );
+
+    public sealed record UpdateIssueOutput(
+        int Id,
+        string Title,
+        string Description,
+        DateTimeOffset CreatedAt,
+        DateTimeOffset? UpdatedAt,
+        IssueStatus Status
+        );
 
     public sealed class IssueService(IssueStore store, IUnitOfWork unitOfWork)
     {
 
-        public async Task<CreateIssueOutput> CreateIssue(CreateIssueInput request)
+        public async Task<CreateIssueOutput> CreateIssueAsync(CreateIssueInput request)
         {
             var issue = new Issue
             (
@@ -36,9 +57,9 @@ namespace IssueTracker.Services
                 request.Description,
                 DateTimeOffset.UtcNow,
                 IssueStatus.Open
-            ); 
+            );
 
-            store.Add(issue);
+            store.AddAsync(issue);
 
             // is not taking the output from the created? is assumption that exceptions wouldnt let output be made this way?
             var output = new CreateIssueOutput(
@@ -54,9 +75,9 @@ namespace IssueTracker.Services
             return output;
         }
 
-        public IReadOnlyList<GetIssueOutput> GetAllIssues()
+        public async Task<IReadOnlyList<GetIssueOutput>> GetAllIssuesAsync()
         {
-            var result = store.GetAll();
+            var result = await store.GetAllAsync();
 
             List<GetIssueOutput> outputList = new();
 
@@ -67,6 +88,7 @@ namespace IssueTracker.Services
                     issue.Title,
                     issue.Description,
                     issue.CreatedAt,
+                    issue.UpdatedAt,
                     issue.Status
                 );
                 outputList.Add(output);
@@ -76,9 +98,9 @@ namespace IssueTracker.Services
 
         }
 
-        public GetIssueOutput? GetById(int id)
+        public async Task<GetIssueOutput?> GetByIdAsync(int id)
         {
-            var result = store.GetById(id);
+            var result = await store.GetByIdAsync(id);
 
             if (result is null)
             {
@@ -90,13 +112,39 @@ namespace IssueTracker.Services
                 result.Title,
                 result.Description,
                 result.CreatedAt,
+                result.UpdatedAt,
                 result.Status
             );
 
             return output;
         }
 
+        public async Task<UpdateIssueOutput?> UpdateIssueAsync(int id, UpdateIssueInput update)
+        {
+            var issue = await store.GetByIdAsync(id);
 
+            if (issue is null)
+            {
+                return null;
+            }
 
+            // EF tracks issue so it will be updated when SaveChangesAsync is called
+            issue.Update(
+                update.Title,
+                update.Description,
+                update.Status
+                );
+
+            await unitOfWork.SaveChangesAsync();
+
+            return new UpdateIssueOutput(
+                issue.Id,
+                issue.Title,
+                issue.Description,
+                issue.CreatedAt,
+                issue.UpdatedAt,
+                issue.Status
+            );
+        }
     }
 }
