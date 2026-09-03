@@ -7,27 +7,31 @@ namespace IssueTracker.ExceptionHandling
     {
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            logger.LogError(exception, "An unhandled exception occurred LOL.");
+            logger.LogError(exception, "An unhandled exception occurred.");
 
             httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            int status = StatusCodes.Status500InternalServerError;
+            string title = "An unexpected error occurred.";
 
-            try
+            bool writeSuccess = await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
             {
-                await problemDetailsService.WriteAsync(new ProblemDetailsContext
+                HttpContext = httpContext,
+                ProblemDetails = new ProblemDetails
                 {
-                    HttpContext = httpContext,
-                    ProblemDetails = new ProblemDetails
-                    {
-                        Status = StatusCodes.Status500InternalServerError,
-                        Title = "An unexpected error occurred.",
-                    }
+                    Status = status,
+                    Title = title,
                 }
-                );
-            }
-            catch (Exception ex)
+            });
+
+            // Return normal JSON without problem details formatting if the problem details service fails to write
+            if (!writeSuccess)
             {
-                logger.LogError(ex, "PROBLEM DETAILS WRITE FAILED");
-                throw;
+                httpContext.Response.ContentType = "application/json";
+                await httpContext.Response.WriteAsJsonAsync(new
+                {
+                    Status = status,
+                    Title = title
+                }, cancellationToken);
             }
 
             return true;

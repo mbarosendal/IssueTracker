@@ -17,7 +17,7 @@ namespace IssueTracker
 
             builder.Services.AddScoped<IssueStore>();
             builder.Services.AddScoped<IssueService>();
-            builder.Services.AddScoped<AppDbContext>();
+            //builder.Services.AddScoped<AppDbContext>();
             builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 
             builder.Services.AddDbContext<AppDbContext>(options => 

@@ -60,16 +60,14 @@ namespace IssueTracker.Controllers
 
     [ApiController]
     [Route("issues")]
+    [Produces("application/json")]
     public class IssuesController(IssueService service) : ControllerBase
     {
 
-        [HttpGet("/problems/{id}")]
-        public ActionResult<string> FailureTest(int id)
+        [HttpGet("/problems")]
+        public ActionResult<string> FailureTest()
         {
-            if (id == 0)
-                throw new Exception("This is a test exception to demonstrate the global exception handling middleware.");
-
-            return Ok("Its ok");
+          throw new Exception("This is a test exception to demonstrate the global exception handling middleware.");
         }
 
         [HttpPost()]
