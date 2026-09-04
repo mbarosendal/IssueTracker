@@ -5,6 +5,7 @@ using IssueTracker.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
 using System.Threading.Tasks;
+using static IssueTracker.Domain.Result;
 
 namespace IssueTracker.Services
 {
@@ -51,28 +52,32 @@ namespace IssueTracker.Services
 
         public async Task<CreateIssueOutput> CreateIssueAsync(CreateIssueInput request)
         {
-            var issue = new Issue
-            (
+            var result = Issue.Create(
                 request.Title,
                 request.Description,
-                DateTimeOffset.UtcNow,
-                IssueStatus.Open
-            );
+                IssueStatus.Open);
 
-            store.AddAsync(issue);
+            if (result is Result<Issue>.Failure failure)
+            {
+                // Translate the domain failure into your application outcome.
+                // We'll wire this to the controller's 400 response.
+                throw new NotImplementedException();
+            }
 
-            // is not taking the output from the created? is assumption that exceptions wouldnt let output be made this way?
-            var output = new CreateIssueOutput(
+            var success = (Result<Issue>.Success)result;
+            var issue = success.Value;
+
+            store.Add(issue);
+
+            await unitOfWork.SaveChangesAsync();
+
+            // construct the output after SaveChangesAsync(), because that's when the database-generated Id has been populated.
+            return new CreateIssueOutput(
                 issue.Id,
                 issue.Title,
                 issue.Description,
                 issue.CreatedAt,
-                issue.Status
-            );
-
-            await unitOfWork.SaveChangesAsync();
-
-            return output;
+                issue.Status);
         }
 
         public async Task<IReadOnlyList<GetIssueOutput>> GetAllIssuesAsync()
@@ -119,21 +124,31 @@ namespace IssueTracker.Services
             return output;
         }
 
-        public async Task<UpdateIssueOutput?> UpdateIssueAsync(int id, UpdateIssueInput update)
+        public async Task<UpdateIssueOutput?> UpdateIssueAsync(
+            int id,
+            UpdateIssueInput request)
         {
             var issue = await store.GetByIdAsync(id);
 
             if (issue is null)
-            {
                 return null;
+
+            var result = issue.Update(
+                request.Title,
+                request.Description,
+                request.Status);
+
+            if (result is Result.InvalidTitle)
+            {
+                // Translate to application failure.
+                throw new NotImplementedException();
             }
 
-            // EF tracks issue so it will be updated when SaveChangesAsync is called
-            issue.Update(
-                update.Title,
-                update.Description,
-                update.Status
-                );
+            if (result is Result.InvalidDescription)
+            {
+                // Translate to application failure.
+                throw new NotImplementedException();
+            }
 
             await unitOfWork.SaveChangesAsync();
 
@@ -143,8 +158,7 @@ namespace IssueTracker.Services
                 issue.Description,
                 issue.CreatedAt,
                 issue.UpdatedAt,
-                issue.Status
-            );
+                issue.Status);
         }
     }
 }

@@ -6,10 +6,9 @@ namespace IssueTracker.Infrastructure
 {
     public class IssueStore(AppDbContext _dbContext)
     {
-
-        public async void AddAsync(Issue issue)
+        public void Add(Issue issue)
         {
-            await _dbContext.AddAsync(issue);
+            _dbContext.Add(issue);
         }
 
         public async Task<List<Issue>> GetAllAsync()
