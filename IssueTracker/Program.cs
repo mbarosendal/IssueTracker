@@ -47,7 +47,17 @@ namespace IssueTracker
             app.UseAuthorization();
 
             app.MapControllers();
-            
+
+            // Type T can be inferred!
+            //static T Echo<T>(T value)
+            //{
+            //    return value;
+            //}
+
+            //var number = Echo(42);
+            //var text = Echo("hello");
+            //Console.WriteLine($"number is {number.GetType().Name} and text is {text.GetType().Name}");
+
             app.Run();
         }
     }
