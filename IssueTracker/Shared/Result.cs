@@ -1,4 +1,4 @@
-﻿namespace IssueTracker.Domain.Shared
+﻿namespace IssueTracker.Shared
 {    public class Result
     {
         protected Result(bool isSuccess, Error error)

@@ -1,6 +1,6 @@
 ﻿using IssueTracker.Domain;
-using IssueTracker.Domain.Shared;
 using IssueTracker.Infrastructure;
+using IssueTracker.Shared;
 
 namespace IssueTracker.Services
 {
@@ -54,13 +54,13 @@ namespace IssueTracker.Services
                 issue.Id, issue.Title, issue.Description, issue.CreatedAt, issue.UpdatedAt, issue.Status);
         }
 
-        public async Task<Result<UpdateIssueOutput>?> UpdateIssueAsync(int id, UpdateIssueInput request)
+        public async Task<Result<UpdateIssueOutput>> UpdateIssueAsync(int id, UpdateIssueInput request)
         {
             var issue = await store.GetByIdAsync(id);
-            if (issue is null) return null;
+            if (issue is null)
+                return Result<UpdateIssueOutput>.Failure(IssueErrors.NotFound(id));
 
             var result = issue.Update(request.Title, request.Description, request.Status);
-
             if (result.IsFailure)
                 return Result<UpdateIssueOutput>.Failure(result.Error);
 

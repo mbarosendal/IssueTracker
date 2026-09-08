@@ -1,62 +1,10 @@
-using IssueTracker.Domain;
-using IssueTracker.Domain.Shared;
 using IssueTracker.Services;
+using IssueTracker.Shared;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
+using static IssueTracker.Controllers.Contracts.Contracts;
 
 namespace IssueTracker.Controllers
-{
-    public sealed class CreateIssueRequest
-    {
-        [Required]
-        [StringLength(50, MinimumLength = 1)]
-        public string Title { get; init; } = string.Empty;
-        [Required]
-        [StringLength(500, MinimumLength = 1)]
-        public string Description { get; init; } = string.Empty;
-    }
-
-    public sealed class CreateIssueResponse
-    {
-        public int Id { get; init; }
-        public string Title { get; init; } = string.Empty;
-        public string Description { get; init; } = string.Empty;
-        public DateTimeOffset CreatedAt { get; init; }
-        public IssueStatus Status { get; init; }
-    }
-
-    public sealed class GetIssueResponse
-    {
-        public int Id { get; init; }
-        public string Title { get; init; } = string.Empty;
-        public string Description { get; init; } = string.Empty;
-        public DateTimeOffset CreatedAt { get; init; }
-        public DateTimeOffset? UpdatedAt { get; init; }
-        public IssueStatus Status { get; init; }
-    }
-
-    public sealed class UpdateIssueResponse
-    {
-        public int Id { get; init; }
-        public string Title { get; init; } = string.Empty;
-        public string Description { get; init; } = string.Empty;
-        public DateTimeOffset CreatedAt { get; init; }
-        public DateTimeOffset? UpdatedAt { get; init; }
-        public IssueStatus Status { get; init; }
-    }
-
-    public sealed class UpdateIssueRequest
-    {
-        [Required]
-        [StringLength(50, MinimumLength = 1)]
-        public string Title { get; init; } = string.Empty;
-        [Required]
-        [StringLength(500, MinimumLength = 1)]
-        public string Description { get; init; } = string.Empty;
-        public IssueStatus Status { get; init; }
-    }
-
+{    
     [ApiController]
     [Route("issues")]
     [Produces("application/json")]
@@ -78,10 +26,9 @@ namespace IssueTracker.Controllers
             // as-value: no need to know WHICH error, just relay Code/Description to the client
             if (result.IsFailure)
             {
-                return Problem(
-                    title: result.Error.Code,
-                    detail: result.Error.Description,
-                    statusCode: StatusCodes.Status400BadRequest);
+                var statusCode = ErrorMapper.ToStatusCode(result.Error.Type);
+
+                return Problem(title: result.Error.Code, detail: result.Error.Description, statusCode: statusCode);
             }
 
             var issue = result.Value; // Value is the success object; only safe to read .Value because IsFailure was already checked above
@@ -146,17 +93,11 @@ namespace IssueTracker.Controllers
 
             var result = await issueService.UpdateIssueAsync(id, input);
 
-            // null = issue didn't exist at all -> 404
-            if (result is null)
-                return NotFound();
-
-            // non-null but failed = issue exists, update was invalid -> 400
             if (result.IsFailure)
             {
-                return Problem(
-                    title: result.Error.Code,
-                    detail: result.Error.Description,
-                    statusCode: StatusCodes.Status400BadRequest);
+                var statusCode = ErrorMapper.ToStatusCode(result.Error.Type);
+
+                return Problem(title: result.Error.Code, detail: result.Error.Description, statusCode: statusCode);
             }
 
             var issue = result.Value;

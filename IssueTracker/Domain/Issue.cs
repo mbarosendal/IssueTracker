@@ -1,4 +1,4 @@
-﻿using IssueTracker.Domain.Shared;
+﻿using IssueTracker.Shared;
 using System.ComponentModel.DataAnnotations;
 
 namespace IssueTracker.Domain
