@@ -17,8 +17,24 @@ namespace IssueTracker.Services
     public sealed record UpdateIssueOutput(
         int Id, string Title, string Description, DateTimeOffset CreatedAt, DateTimeOffset? UpdatedAt, IssueStatus Status);
 
-    public sealed class IssueService(IssueStore store, IUnitOfWork unitOfWork)
+
+    public sealed class IssueService(IIssueStore store, IUnitOfWork unitOfWork)
     {
+
+        public async Task<Result> DeleteIssueAsync(int id)
+        {
+            var issue = await store.GetByIdAsync(id);
+
+            if (issue is null)
+                return Result.Failure(IssueErrors.NotFound(id));
+
+            store.Delete(issue);
+
+            await unitOfWork.SaveChangesAsync();
+
+            return Result.Success();
+        }
+
         public async Task<Result<CreateIssueOutput>> CreateIssueAsync(CreateIssueInput request)
         {
             var result = Issue.Create(request.Title, request.Description, IssueStatus.Open);
@@ -48,7 +64,9 @@ namespace IssueTracker.Services
         public async Task<GetIssueOutput?> GetByIdAsync(int id)
         {
             var issue = await store.GetByIdAsync(id);
-            if (issue is null) return null;
+
+            if (issue is null) 
+                return null;
 
             return new GetIssueOutput(
                 issue.Id, issue.Title, issue.Description, issue.CreatedAt, issue.UpdatedAt, issue.Status);

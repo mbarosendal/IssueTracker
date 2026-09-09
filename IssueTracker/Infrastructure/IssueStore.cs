@@ -4,7 +4,7 @@ using System.Security.Cryptography.Xml;
 
 namespace IssueTracker.Infrastructure
 {
-    public class IssueStore(AppDbContext _dbContext)
+    public class IssueStore(AppDbContext _dbContext) : IIssueStore
     {
         public void Add(Issue issue)
         {
@@ -19,6 +19,11 @@ namespace IssueTracker.Infrastructure
         public async Task<Issue?> GetByIdAsync(int id)
         {
             return await _dbContext.Issues.FirstOrDefaultAsync(i => i.Id == id);
+        }
+
+        public void Delete(Issue issue)
+        {
+            _dbContext.Remove(issue);
         }
     }
 }

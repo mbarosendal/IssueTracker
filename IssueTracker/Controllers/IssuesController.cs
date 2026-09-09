@@ -16,6 +16,21 @@ namespace IssueTracker.Controllers
             throw new Exception("This is a test exception to demonstrate the global exception handling middleware.");
         }
 
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteAsync(int id)
+        {
+            var result = await issueService.DeleteIssueAsync(id);
+
+            if (result.IsFailure)
+            {
+                var statusCode = ErrorMapper.ToStatusCode(result.Error.Type);
+
+                return Problem(title: result.Error.Code, detail: result.Error.Description, statusCode: statusCode);
+            }
+
+            return NoContent(); 
+        }
+
         [HttpPost()]
         public async Task<ActionResult<CreateIssueResponse>> CreateAsync(CreateIssueRequest request)
         {
