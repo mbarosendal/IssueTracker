@@ -54,5 +54,33 @@ namespace IssueTrackerTests.Controllers
             Assert.AreEqual(ErrorType.NotFound, result.Error.Type);
         }
 
+        [TestMethod()]
+        public async Task DeleteAsyncTestDatabaseFailure()
+        {
+            var resultIssue = Issue.Create(
+            "Screen flickering",
+            "It's driving me insane.",
+            IssueStatus.Open);
+
+            var issue = resultIssue.Value;
+
+            Mock<IIssueStore> storeMock = new();
+            storeMock
+                .Setup(x => x.GetByIdAsync(123))
+                .ReturnsAsync(issue);
+
+            Mock<IUnitOfWork> unitMock = new();
+            unitMock
+                .Setup(x => x.SaveChangesAsync())
+                .Returns(Task.FromException(new Exception()));
+
+            IssueService issueService = new(storeMock.Object, unitMock.Object);
+
+            await Assert.ThrowsExceptionAsync<Exception>(
+                () => issueService.DeleteIssueAsync(123));
+
+            storeMock.Verify(x => x.GetByIdAsync(123), Times.Once());
+            unitMock.Verify(x => x.SaveChangesAsync(), Times.Once());
+        }
     }
 }
