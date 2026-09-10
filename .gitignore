@@ -362,5 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /IssueTracker/appsettings.json
-/IssueTrackerTests/.runsettings
 /IssueTrackerTests/test.runsettings
