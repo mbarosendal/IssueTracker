@@ -26,7 +26,7 @@ namespace IssueTrackerTests.Controllers.Unit
 
             var issue = resultIssue.Value;
 
-            Mock<IIssueStore> storeMock = new();
+            Mock<IIssueRepository> storeMock = new();
             storeMock
                 .Setup(x => x.GetByIdAsync(123))
                 .ReturnsAsync(issue);
@@ -48,7 +48,7 @@ namespace IssueTrackerTests.Controllers.Unit
         [TestMethod()]
         public async Task DeleteAsyncTestFailure()
         {
-            Mock<IIssueStore> storeMock = new();
+            Mock<IIssueRepository> storeMock = new();
             storeMock
                 .Setup(x => x.GetByIdAsync(123))
                 .ReturnsAsync((Issue?)null);
@@ -74,7 +74,7 @@ namespace IssueTrackerTests.Controllers.Unit
 
             var issue = resultIssue.Value;
 
-            Mock<IIssueStore> storeMock = new();
+            Mock<IIssueRepository> storeMock = new();
             storeMock
                 .Setup(x => x.GetByIdAsync(123))
                 .ReturnsAsync(issue);

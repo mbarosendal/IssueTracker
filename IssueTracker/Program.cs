@@ -15,7 +15,7 @@ namespace IssueTracker
 
             // Add services to the container.
 
-            builder.Services.AddScoped<IIssueStore, IssueStore>();
+            builder.Services.AddScoped<IIssueRepository, IssueRepository>();
             builder.Services.AddScoped<IssueService>();
             //builder.Services.AddScoped<AppDbContext>();
             builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();

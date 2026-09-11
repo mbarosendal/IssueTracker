@@ -28,7 +28,7 @@ namespace IssueTrackerTests.Controllers.Integration
             // Arrange
             await using var context = await Database.CreateContextAsync();
 
-            IssueStore issueStore = new(context);
+            IssueRepository issueStore = new(context);
             EfUnitOfWork efUnitOfWork = new(context);
             IssueTracker.Services.IssueService issueService = new(issueStore, efUnitOfWork);
 
@@ -59,7 +59,7 @@ namespace IssueTrackerTests.Controllers.Integration
             // Arrange
             await using var context = await Database.CreateContextAsync();
 
-            IssueStore issueStore = new(context);
+            IssueRepository issueStore = new(context);
             EfUnitOfWork efUnitOfWork = new(context);
 
             var result = Issue.Create(title: "TestTitle", description: "TestDescription", IssueStatus.Open);

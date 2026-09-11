@@ -2,10 +2,10 @@
 
 namespace IssueTracker.Infrastructure
 {
-    public interface IIssueStore
+    public interface IIssueRepository
     {
         void Add(Issue issue);
-        Task<List<Issue>> GetAllAsync();
+        Task<List<Issue>> GetAllAsync(CancellationToken cancellationToken);
         Task<Issue?> GetByIdAsync(int id);
         void Delete(Issue issue);
 

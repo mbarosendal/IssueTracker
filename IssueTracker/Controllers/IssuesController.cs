@@ -61,10 +61,10 @@ namespace IssueTracker.Controllers
         }
 
         [HttpGet()]
-        public async Task<ActionResult<List<GetIssueResponse>>> GetAllAsync()
+        public async Task<ActionResult<List<GetIssueResponse>>> GetAllAsync(CancellationToken cancellationToken)
         {
             // no Result here — a list query has no business-rule failure mode, just data
-            var result = await issueService.GetAllIssuesAsync();
+            var result = await issueService.GetAllIssuesAsync(cancellationToken);
 
             var response = result.Select(issue => new GetIssueResponse
             {

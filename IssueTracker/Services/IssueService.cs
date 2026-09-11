@@ -18,7 +18,7 @@ namespace IssueTracker.Services
         int Id, string Title, string Description, DateTimeOffset CreatedAt, DateTimeOffset? UpdatedAt, IssueStatus Status);
 
 
-    public sealed class IssueService(IIssueStore store, IUnitOfWork unitOfWork)
+    public sealed class IssueService(IIssueRepository store, IUnitOfWork unitOfWork)
     {
 
         public async Task<Result> DeleteIssueAsync(int id)
@@ -52,9 +52,9 @@ namespace IssueTracker.Services
             return Result<CreateIssueOutput>.Success(output);
         }
 
-        public async Task<IReadOnlyList<GetIssueOutput>> GetAllIssuesAsync()
+        public async Task<IReadOnlyList<GetIssueOutput>> GetAllIssuesAsync(CancellationToken cancellationToken)
         {
-            var issues = await store.GetAllAsync();
+            var issues = await store.GetAllAsync(cancellationToken);
 
             return issues
                 .Select(i => new GetIssueOutput(i.Id, i.Title, i.Description, i.CreatedAt, i.UpdatedAt, i.Status))

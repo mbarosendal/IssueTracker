@@ -4,16 +4,16 @@ using System.Security.Cryptography.Xml;
 
 namespace IssueTracker.Infrastructure
 {
-    public class IssueStore(AppDbContext _dbContext) : IIssueStore
+    public class IssueRepository(AppDbContext _dbContext) : IIssueRepository
     {
         public void Add(Issue issue)
         {
             _dbContext.Add(issue);
         }
 
-        public async Task<List<Issue>> GetAllAsync()
+        public async Task<List<Issue>> GetAllAsync(CancellationToken cancellationToken)
         {
-            return await _dbContext.Issues.ToListAsync();
+            return await _dbContext.Issues.ToListAsync(cancellationToken);
         }
 
         public async Task<Issue?> GetByIdAsync(int id)
