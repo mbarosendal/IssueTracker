@@ -6,27 +6,17 @@ using Microsoft.EntityFrameworkCore;
 namespace IssueTrackerTests.Controllers
 {
     [TestClass]
-    public class IntegrationTests
+    public class IntegrationTests : IntegrationTestFixture
     {
-        [TestMethod]
-        public async Task CanGetConnectionString()
-        {
-            // Arrange
-            var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__IntegrationTest");
-
-            // Assert
-            Assert.IsNotNull(connectionString);
-        }
-
         [TestMethod]
         public async Task CanConnectToIntegrationDatabase()
         {
             // Arrange
             var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__IntegrationTest");
-            IntegrationTestDatabase integrationTestDatabase = new(connectionString!);            
+            var testDatabase = await IntegrationTestDatabase.CreateAsync(connectionString);
 
             // Act
-            var context = await integrationTestDatabase.CreateContextAsync();
+            await using var context = await testDatabase.CreateContextAsync();
 
             // Assert
             Assert.IsTrue(await context.Database.CanConnectAsync());
@@ -36,9 +26,8 @@ namespace IssueTrackerTests.Controllers
         public async Task DeleteIssueAsync_WhenIssueExists_DeletesAndSaves()
         {
             // Arrange
-            var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__IntegrationTest");
-            IntegrationTestDatabase integrationTestDatabase = new(connectionString!);
-            await using var context = await integrationTestDatabase.CreateContextAsync();
+            await using var context = await Database.CreateContextAsync();
+
             IssueStore issueStore = new(context);
             EfUnitOfWork efUnitOfWork = new(context);
             IssueService issueService = new(issueStore, efUnitOfWork);
@@ -53,7 +42,7 @@ namespace IssueTrackerTests.Controllers
             // Act
             var resultDelete = await issueService.DeleteIssueAsync(issueId);
 
-            await using var newContextPostDelete = await integrationTestDatabase.CreateContextAsync();
+            await using var newContextPostDelete = await Database.CreateContextAsync();
 
             var resultFind = await newContextPostDelete.Issues
                 .AsNoTracking()
@@ -68,9 +57,8 @@ namespace IssueTrackerTests.Controllers
         public async Task AddIssue_WhenSaved_PersistsIssue()
         {
             // Arrange
-            var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__IntegrationTest");
-            IntegrationTestDatabase integrationTestDatabase = new(connectionString!);
-            await using var context = await integrationTestDatabase.CreateContextAsync();
+            await using var context = await Database.CreateContextAsync();
+
             IssueStore issueStore = new(context);
             EfUnitOfWork efUnitOfWork = new(context);
 
@@ -80,7 +68,7 @@ namespace IssueTrackerTests.Controllers
             await efUnitOfWork.SaveChangesAsync();
 
             // Act
-            await using var newContextPostCreate = await integrationTestDatabase.CreateContextAsync();
+            await using var newContextPostCreate = await Database.CreateContextAsync();
 
             var resultFind = await newContextPostCreate.Issues
                 .AsNoTracking()
