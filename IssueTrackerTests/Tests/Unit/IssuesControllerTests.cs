@@ -4,11 +4,21 @@ using IssueTracker.Services;
 using IssueTracker.Shared;
 using Moq;
 
-namespace IssueTrackerTests.Controllers
+namespace IssueTrackerTests.Controllers.Unit
 {
     [TestClass()]
     public class IssuesControllerTests
     {
+        [TestMethod]
+        public void Create_WithClosedStatus_ReturnsValidationError()
+        {     
+            var issueResult = Issue.Create("Screen flickering", "It's driving me insane.", IssueStatus.Closed);
+
+            Assert.IsFalse(issueResult.IsSuccess);
+            Assert.AreEqual(ErrorType.Validation, issueResult.Error.Type);
+            Assert.AreEqual(IssueErrors.InvalidCreateStatus, issueResult.Error);
+        }
+
         [TestMethod()]
         public async Task DeleteAsyncTestSuccess()
         {

@@ -1,5 +1,6 @@
 ﻿using IssueTracker.Shared;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection.Metadata.Ecma335;
 
 namespace IssueTracker.Domain
 {
@@ -24,6 +25,7 @@ namespace IssueTracker.Domain
         {
             if (!IsValidTitle(title)) return Result<Issue>.Failure(IssueErrors.InvalidTitle);
             if (!IsValidDescription(description)) return Result<Issue>.Failure(IssueErrors.InvalidDescription);
+            if (!IsValidCreateStatus(status)) return Result<Issue>.Failure(IssueErrors.InvalidCreateStatus);
 
             return Result<Issue>.Success(new Issue(title, description, DateTimeOffset.UtcNow, status));
         }
@@ -42,5 +44,6 @@ namespace IssueTracker.Domain
 
         private static bool IsValidTitle(string title) => !string.IsNullOrWhiteSpace(title) && title.Length <= 50;
         private static bool IsValidDescription(string description) => !string.IsNullOrWhiteSpace(description) && description.Length <= 500;
+        private static bool IsValidCreateStatus(IssueStatus status) => status != IssueStatus.Closed;
     }
 }
