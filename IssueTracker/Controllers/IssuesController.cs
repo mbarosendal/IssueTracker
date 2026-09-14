@@ -8,7 +8,7 @@ namespace IssueTracker.Controllers
     [ApiController]
     [Route("issues")]
     [Produces("application/json")]
-    public class IssuesController(IssueService issueService) : ControllerBase
+    public class IssuesController(IIssueService issueService) : ControllerBase
     {
         [HttpGet("/problems")]
         public ActionResult<string> FailureTest()

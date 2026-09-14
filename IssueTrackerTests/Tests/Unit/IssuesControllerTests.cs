@@ -1,10 +1,14 @@
-﻿using IssueTracker.Domain;
+﻿using IssueTracker.Controllers;
+using IssueTracker.Domain;
 using IssueTracker.Infrastructure;
 using IssueTracker.Services;
 using IssueTracker.Shared;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Moq;
 using System.Data;
+using static IssueTracker.Controllers.Contracts.Contracts;
 
 namespace IssueTrackerTests.Tests.Unit
 {
@@ -22,7 +26,45 @@ namespace IssueTrackerTests.Tests.Unit
         }
 
         [TestMethod]
-        public async Task UpdateIssue_WhenConcurrencyConflictOccurs_ReturnsConflict()
+        public async Task UpdateAsync_WhenConcurrencyConflictOccurs_ReturnsConflict()
+        {
+            // Arrange
+            var concurrencyError = IssueServiceErrors.ConcurrencyConflict;
+
+            var issueServiceMock = new Mock<IIssueService>();
+            issueServiceMock
+                .Setup(x => x.UpdateIssueAsync(
+                    123,
+                    It.IsAny<UpdateIssueInput>()))
+                .ReturnsAsync(Result<UpdateIssueOutput>.Failure(concurrencyError));
+
+            var controller = new IssuesController(issueServiceMock.Object);
+
+            var request = new UpdateIssueRequest
+            {
+                Title = "updatedTitle",
+                Description = "updatedDescription",
+                Status = IssueStatus.InProgress
+            };
+
+            // Act
+            var result = await controller.UpdateAsync(123, request);
+
+            // Assert
+            var objectResult = result.Result as ObjectResult;
+
+            Assert.IsNotNull(objectResult);
+            Assert.AreEqual(StatusCodes.Status409Conflict, objectResult.StatusCode);
+
+            var problemDetails = objectResult.Value as ProblemDetails;
+
+            Assert.IsNotNull(problemDetails);
+            Assert.AreEqual(concurrencyError.Code, problemDetails.Title);
+            Assert.AreEqual(concurrencyError.Description, problemDetails.Detail);
+        }
+
+        [TestMethod]
+        public async Task UpdateIssueAsync_WhenConcurrencyConflictOccurs_ReturnsConflict()
         {
             {
                 var resultIssue = Issue.Create("Screen flickering", "It's driving me insane.", IssueStatus.Open);

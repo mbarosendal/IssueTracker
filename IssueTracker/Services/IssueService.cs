@@ -20,17 +20,17 @@ namespace IssueTracker.Services
         int Id, string Title, string Description, DateTimeOffset CreatedAt, DateTimeOffset? UpdatedAt, IssueStatus Status);
 
 
-    public sealed class IssueService(IIssueRepository store, IUnitOfWork unitOfWork)
+    public sealed class IssueService(IIssueRepository repository, IUnitOfWork unitOfWork) : IIssueService
     {
 
         public async Task<Result> DeleteIssueAsync(int id)
         {
-            var issue = await store.GetByIdAsync(id);
+            var issue = await repository.GetByIdAsync(id);
 
             if (issue is null)
                 return Result.Failure(IssueErrors.NotFound(id));
 
-            store.Delete(issue);
+            repository.Delete(issue);
 
             await unitOfWork.SaveChangesAsync();
 
@@ -45,7 +45,7 @@ namespace IssueTracker.Services
                 return Result<CreateIssueOutput>.Failure(result.Error);
 
             var issue = result.Value;
-            store.Add(issue);
+            repository.Add(issue);
             await unitOfWork.SaveChangesAsync(); // populates issue.Id
 
             var output = new CreateIssueOutput(
@@ -56,7 +56,7 @@ namespace IssueTracker.Services
 
         public async Task<IReadOnlyList<GetIssueOutput>> GetAllIssuesAsync(CancellationToken cancellationToken)
         {
-            var issues = await store.GetAllAsync(cancellationToken);
+            var issues = await repository.GetAllAsync(cancellationToken);
 
             return issues
                 .Select(i => new GetIssueOutput(i.Id, i.Title, i.Description, i.CreatedAt, i.UpdatedAt, i.Status))
@@ -65,7 +65,7 @@ namespace IssueTracker.Services
 
         public async Task<GetIssueOutput?> GetByIdAsync(int id)
         {
-            var issue = await store.GetByIdAsync(id);
+            var issue = await repository.GetByIdAsync(id);
 
             if (issue is null)
                 return null;
@@ -77,7 +77,7 @@ namespace IssueTracker.Services
         public async Task<Result<UpdateIssueOutput>> UpdateIssueAsync(int id, UpdateIssueInput request)
         {
  
-                var issue = await store.GetByIdAsync(id);
+                var issue = await repository.GetByIdAsync(id);
                 if (issue is null)
                     return Result<UpdateIssueOutput>.Failure(IssueErrors.NotFound(id));
 
