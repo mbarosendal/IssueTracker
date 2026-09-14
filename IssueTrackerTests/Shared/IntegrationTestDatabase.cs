@@ -4,7 +4,7 @@ using Respawn;
 using Respawn.Graph;
 using Testcontainers.MsSql;
 
-namespace IssueTrackerTests;
+namespace IssueTrackerTests.Shared;
 
 public abstract class DatabaseFixture
 {

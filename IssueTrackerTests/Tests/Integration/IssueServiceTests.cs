@@ -1,6 +1,8 @@
-﻿using IssueTracker.Domain;
-using IssueTracker.Infrastructure;
+﻿using Docker.DotNet.Models;
+using IssueTracker.Domain;
 using IssueTracker.Services;
+using IssueTrackerTests.Shared;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 
 namespace IssueTrackerTests.Tests.Integration
@@ -9,63 +11,126 @@ namespace IssueTrackerTests.Tests.Integration
     public class IssueServiceTests : DatabaseFixture
     {
         [TestMethod]
+        public async Task UpdateIssue_WhenIssueExists_UpdatesIssue()
+        {
+            await using var createContext = CreateContext();
+            var createdIssue = await IssueDataFactory.CreateAsync(createContext, "testTitle", "testDescription", IssueStatus.Open);
+
+            await using var updateContext = CreateContext();
+            var actService = IssueServiceFactory.CreateIssueService(updateContext);
+            var updateRequest = new UpdateIssueInput("newTitle", "newDescription", IssueStatus.InProgress);
+
+            //Act
+            var actResult = await actService.UpdateIssueAsync(createdIssue.Id, updateRequest);
+
+            //Assert
+            await using var verificationContext = CreateContext();
+
+            var assertResult = await verificationContext.Issues
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == createdIssue.Id);
+
+            Assert.IsNotNull(assertResult);
+            Assert.IsTrue(actResult.IsSuccess);
+            Assert.AreEqual(updateRequest.Title, assertResult.Title);
+            Assert.AreEqual(updateRequest.Description, assertResult.Description);
+            Assert.AreEqual(updateRequest.Status, assertResult.Status);
+        }
+
+        [TestMethod]
+        public async Task GetAllIssues_WhenIssuesExist_ReturnsAllIssues()
+        {
+            await using var createContext = CreateContext();
+            await IssueDataFactory.CreateAsync(createContext, "testTitle", "testDescription", IssueStatus.Open);
+            await IssueDataFactory.CreateAsync(createContext, "testTitleTwo", "testDescriptionTwo", IssueStatus.Open);
+
+            await using var readContext = CreateContext();
+            var service = IssueServiceFactory.CreateIssueService(readContext);
+
+            //Act
+            var readResult = await service.GetAllIssuesAsync(CancellationToken.None);
+
+            //Assert
+            Assert.IsNotNull(readResult.FirstOrDefault(i => i.Title == "testTitle"));
+            Assert.IsNotNull(readResult.FirstOrDefault(i => i.Title == "testTitleTwo"));
+            Assert.AreEqual(2, readResult.Count);
+        }
+
+        [TestMethod]
+        public async Task GetById_WhenIssueExists_ReturnsIssue()
+        {
+            //Arrange
+            await using var createContext = CreateContext();
+            var createdIssue = await IssueDataFactory.CreateAsync(createContext, "testTitle", "testDescription", IssueStatus.Open);
+
+            await using var readContext = CreateContext();
+            var service = IssueServiceFactory.CreateIssueService(readContext);
+
+            //Act
+            var readResult = await service.GetByIdAsync(createdIssue.Id);
+
+            //Assert
+            Assert.IsNotNull(readResult);
+            Assert.AreEqual(createdIssue.Id, readResult.Id);
+            Assert.AreEqual(createdIssue.Description, readResult.Description);
+            Assert.AreEqual(createdIssue.Title, readResult.Title);
+        }
+
+        [TestMethod]
         public async Task DeleteIssueAsync_WhenIssueExists_DeletesAndSaves()
         {
             // Arrange
-            await using var context = CreateContext();
+            await using var createContext = CreateContext();
+            var createdIssue = await IssueDataFactory.CreateAsync(
+                createContext,
+                "testTitle",
+                "testDescription",
+                IssueStatus.Open);
 
-            IssueRepository issueStore = new(context);
-            EfUnitOfWork efUnitOfWork = new(context);
-            IssueService issueService = new(issueStore, efUnitOfWork);
-
-            var result = Issue.Create(title: "TestTitle", description: "TestDescription", IssueStatus.Open);
-            var issue = result.Value;
-            issueStore.Add(issue);
-
-            await efUnitOfWork.SaveChangesAsync();
-            var issueId = issue.Id;
+            await using var deleteContext = CreateContext();
+            var service = IssueServiceFactory.CreateIssueService(deleteContext);
 
             // Act
-            var resultDelete = await issueService.DeleteIssueAsync(issueId);
-
-            await using var newContextPostDelete = CreateContext();
-
-            var resultFind = await newContextPostDelete.Issues
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == issueId);
+            var deleteResult = await service.DeleteIssueAsync(createdIssue.Id);
 
             // Assert
-            Assert.IsTrue(resultDelete.IsSuccess);
-            Assert.IsNull(resultFind);
+            await using var verificationContext = CreateContext();
+
+            var readResult = await verificationContext.Issues
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == createdIssue.Id);
+
+            Assert.IsTrue(deleteResult.IsSuccess);
+            Assert.IsNull(readResult);
         }
 
         [TestMethod]
         public async Task AddIssue_WhenSaved_PersistsIssue()
         {
             // Arrange
-            await using var context = CreateContext();
+            await using var createContext = CreateContext();
+            var service = IssueServiceFactory.CreateIssueService(createContext);
 
-            IssueRepository issueStore = new(context);
-            EfUnitOfWork efUnitOfWork = new(context);
-
-            var result = Issue.Create(title: "TestTitle", description: "TestDescription", IssueStatus.Open);
-            var issue = result.Value;
-            issueStore.Add(issue);
-            await efUnitOfWork.SaveChangesAsync();
+            var issue = new CreateIssueInput(
+                "title",
+                "description"
+                );
 
             // Act
-            await using var newContextPostCreate = CreateContext();
-
-            var resultFind = await newContextPostCreate.Issues
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == issue.Id);
+            await service.CreateIssueAsync(issue);
 
             // Assert
-            Assert.IsNotNull(resultFind);
-            Assert.AreEqual(issue.Id, resultFind.Id);
-            Assert.AreEqual(issue.Title, resultFind.Title);
-            Assert.AreEqual(issue.Description, resultFind.Description);
-            Assert.AreEqual(issue.CreatedAt, resultFind.CreatedAt);
+            await using var verificationContext = CreateContext();
+            
+            var readResult = await verificationContext.Issues
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Title == "title");
+
+            Assert.IsNotNull(readResult);
+            Assert.IsTrue(readResult.Id > 0);
+            Assert.AreNotEqual(default, readResult.CreatedAt);
+            Assert.AreEqual(issue.Title, readResult.Title);
+            Assert.AreEqual(issue.Description, readResult.Description);
         }
     }
 }
