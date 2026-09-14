@@ -4,7 +4,7 @@ using IssueTracker.Services;
 using IssueTracker.Shared;
 using Moq;
 
-namespace IssueTrackerTests.Controllers.Unit
+namespace IssueTrackerTests.Tests.Unit
 {
     [TestClass()]
     public class IssuesControllerTests

@@ -1,71 +1,71 @@
 ﻿using IssueTracker;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Respawn;
 using Respawn.Graph;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using Testcontainers.MsSql;
 
-namespace IssueTrackerTests
+namespace IssueTrackerTests;
+
+public abstract class DatabaseFixture
 {
-    public sealed class IntegrationTestDatabase
+    private static MsSqlContainer _container = null!;
+    private static Respawner _respawner = null!;
+    private static string _connectionString = null!;
+
+    [ClassInitialize(InheritanceBehavior.BeforeEachDerivedClass)]
+    public static async Task Initialize(TestContext context)
     {
-        private readonly string _connectionString;
-        private readonly Respawner _respawner;
+        _container = new MsSqlBuilder()
+            .Build();
 
-        private IntegrationTestDatabase(
-            string connectionString,
-            Respawner respawner)
-        {
-            _connectionString = connectionString;
-            _respawner = respawner;
-        }
+        await _container.StartAsync();
 
-        public static async Task<IntegrationTestDatabase> CreateAsync(
-            string connectionString)
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlServer(connectionString)
-                .Options;
+        _connectionString = _container.GetConnectionString();
 
-            await using var context = new AppDbContext(options);
+        await using var dbContext = CreateContext();
 
-            await context.Database.MigrateAsync();
+        await dbContext.Database.MigrateAsync();
 
-            var connection = context.Database.GetDbConnection();
+        await using var connection = dbContext.Database.GetDbConnection();
 
-            await connection.OpenAsync();
+        await connection.OpenAsync();
 
-            var respawner = await Respawner.CreateAsync(
-                connection,
-                new RespawnerOptions
-                {
-                    TablesToIgnore = new Table[]
-                    {
-                        "__EFMigrationsHistory"
-                    }
-                });
+        _respawner = await Respawner.CreateAsync(
+            connection,
+            new RespawnerOptions
+            {
+                TablesToIgnore =
+                [
+                    "__EFMigrationsHistory"
+                ]
+            });
+    }
 
-            return new IntegrationTestDatabase(
-                connectionString,
-                respawner);
-        }
+    [TestInitialize]
+    public async Task ResetDatabase()
+    {
+        await using var connection =
+            new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
 
-        public async Task ResetAsync()
-        {
-            await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
 
-            await connection.OpenAsync();
+        await _respawner.ResetAsync(connection);
+    }
 
-            await _respawner.ResetAsync(connection);
-        }
+    [ClassCleanup(
+        InheritanceBehavior.BeforeEachDerivedClass,
+        ClassCleanupBehavior.EndOfClass)]
+    public static async Task Cleanup()
+    {
+        await _container.DisposeAsync();
+    }
 
-        public async Task<AppDbContext> CreateContextAsync()
-        {
-            var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlServer(_connectionString)
-                .Options;
+    protected static AppDbContext CreateContext()
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlServer(_connectionString)
+            .Options;
 
-            return new AppDbContext(options);
-        }
+        return new AppDbContext(options);
     }
 }
