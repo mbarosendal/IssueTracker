@@ -12,7 +12,12 @@ namespace IssueTracker
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
-        //    optionsBuilder.UseSqlServer("");
+
         //}
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Issue>().Property(i => i.RowVersion).IsRowVersion();
+        }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using IssueTracker.Domain;
 using IssueTracker.Infrastructure;
 using IssueTracker.Shared;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace IssueTracker.Services
 {
@@ -65,7 +67,7 @@ namespace IssueTracker.Services
         {
             var issue = await store.GetByIdAsync(id);
 
-            if (issue is null) 
+            if (issue is null)
                 return null;
 
             return new GetIssueOutput(
@@ -74,20 +76,27 @@ namespace IssueTracker.Services
 
         public async Task<Result<UpdateIssueOutput>> UpdateIssueAsync(int id, UpdateIssueInput request)
         {
-            var issue = await store.GetByIdAsync(id);
-            if (issue is null)
-                return Result<UpdateIssueOutput>.Failure(IssueErrors.NotFound(id));
+ 
+                var issue = await store.GetByIdAsync(id);
+                if (issue is null)
+                    return Result<UpdateIssueOutput>.Failure(IssueErrors.NotFound(id));
 
-            var result = issue.Update(request.Title, request.Description, request.Status);
-            if (result.IsFailure)
-                return Result<UpdateIssueOutput>.Failure(result.Error);
+                var result = issue.Update(request.Title, request.Description, request.Status);
+                if (result.IsFailure)
+                    return Result<UpdateIssueOutput>.Failure(result.Error);
 
-            await unitOfWork.SaveChangesAsync();
+            try
+            {
+                await unitOfWork.SaveChangesAsync();
+                var output = new UpdateIssueOutput(
+                    issue.Id, issue.Title, issue.Description, issue.CreatedAt, issue.UpdatedAt, issue.Status);
 
-            var output = new UpdateIssueOutput(
-                issue.Id, issue.Title, issue.Description, issue.CreatedAt, issue.UpdatedAt, issue.Status);
-
-            return Result<UpdateIssueOutput>.Success(output);
+                return Result<UpdateIssueOutput>.Success(output);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return Result<UpdateIssueOutput>.Failure(IssueServiceErrors.ConcurrencyConflict);
+            }
         }
     }
 }

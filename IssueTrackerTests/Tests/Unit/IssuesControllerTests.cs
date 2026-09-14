@@ -2,7 +2,9 @@
 using IssueTracker.Infrastructure;
 using IssueTracker.Services;
 using IssueTracker.Shared;
+using Microsoft.EntityFrameworkCore;
 using Moq;
+using System.Data;
 
 namespace IssueTrackerTests.Tests.Unit
 {
@@ -11,12 +13,40 @@ namespace IssueTrackerTests.Tests.Unit
     {
         [TestMethod]
         public void Create_WithClosedStatus_ReturnsValidationError()
-        {     
+        {
             var issueResult = Issue.Create("Screen flickering", "It's driving me insane.", IssueStatus.Closed);
 
             Assert.IsFalse(issueResult.IsSuccess);
             Assert.AreEqual(ErrorType.Validation, issueResult.Error.Type);
             Assert.AreEqual(IssueErrors.InvalidCreateStatus, issueResult.Error);
+        }
+
+        [TestMethod]
+        public async Task UpdateIssue_WhenConcurrencyConflictOccurs_ReturnsConflict()
+        {
+            {
+                var resultIssue = Issue.Create("Screen flickering", "It's driving me insane.", IssueStatus.Open);
+
+                var issue = resultIssue.Value;
+
+                Mock<IIssueRepository> storeMock = new();
+                storeMock
+                    .Setup(x => x.GetByIdAsync(123))
+                    .ReturnsAsync(issue);
+                Mock<IUnitOfWork> unitMock = new();
+                unitMock
+                    .Setup(x => x.SaveChangesAsync())
+                    .Returns(Task.FromException(new DbUpdateConcurrencyException()));
+
+                IssueService issueService = new(storeMock.Object, unitMock.Object);
+                UpdateIssueInput updateInput = new("updateTitle", "updateDescription", IssueStatus.InProgress);
+
+                var updateResult = await issueService.UpdateIssueAsync(123, updateInput);
+
+                Assert.IsTrue(updateResult.IsFailure);
+                Assert.AreEqual(ErrorType.Conflict, updateResult.Error.Type);
+                Assert.AreEqual(IssueServiceErrors.ConcurrencyConflict, updateResult.Error);
+            }
         }
 
         [TestMethod()]

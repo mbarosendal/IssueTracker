@@ -11,6 +11,38 @@ namespace IssueTrackerTests.Tests.Integration
     public class IssueServiceTests : DatabaseFixture
     {
         [TestMethod]
+        public async Task UpdateIssue_WhenRowVersionIsStale_ThrowsConcurrencyException()
+        {
+            await using var createContext = CreateContext();
+
+            var createdIssue = await IssueDataFactory.CreateAsync(
+                createContext,
+                "Concurrency test",
+                "testDescription",
+                IssueStatus.Open
+                );
+
+            await using var firstContext = CreateContext();
+            var firstIssue = await firstContext.Issues.FindAsync(createdIssue.Id);
+            Assert.IsNotNull(firstIssue);
+
+            await using var secondContext = CreateContext();
+            var secondIssue = await secondContext.Issues.FindAsync(createdIssue.Id);
+            Assert.IsNotNull(secondIssue);
+
+            //Act
+            firstIssue.Update("newTitle", "newDescription", IssueStatus.InProgress);
+            await firstContext.SaveChangesAsync();
+
+            secondIssue.Update("newTitleTwo", "newDescriptionTwo", IssueStatus.InProgress);
+
+            //Assert
+            await Assert.ThrowsExceptionAsync<DbUpdateConcurrencyException>(
+                () => secondContext.SaveChangesAsync());
+        }
+
+
+        [TestMethod]
         public async Task UpdateIssue_WhenIssueExists_UpdatesIssue()
         {
             await using var createContext = CreateContext();
@@ -112,7 +144,7 @@ namespace IssueTrackerTests.Tests.Integration
             var service = IssueServiceFactory.CreateIssueService(createContext);
 
             var issue = new CreateIssueInput(
-                "title",
+                "AddIssue_WhenSaved_PersistsIssue",
                 "description"
                 );
 
@@ -121,10 +153,10 @@ namespace IssueTrackerTests.Tests.Integration
 
             // Assert
             await using var verificationContext = CreateContext();
-            
+
             var readResult = await verificationContext.Issues
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Title == "title");
+                .FirstOrDefaultAsync(x => x.Title == "AddIssue_WhenSaved_PersistsIssue");
 
             Assert.IsNotNull(readResult);
             Assert.IsTrue(readResult.Id > 0);

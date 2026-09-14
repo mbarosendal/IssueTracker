@@ -13,13 +13,15 @@ namespace IssueTracker.Domain
             CreatedAt = createdAt;
             Status = status;
         }
-
+         
         public int Id { get; init; }
         [MaxLength(50)] public string Title { get; private set; }
         [MaxLength(500)] public string Description { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; }
         public DateTimeOffset? UpdatedAt { get; private set; }
         public IssueStatus Status { get; private set; }
+        public byte[] RowVersion { get; private set; } = [];
+
 
         public static Result<Issue> Create(string title, string description, IssueStatus status)
         {
