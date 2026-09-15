@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IssueTracker.ExceptionHandling
 {
-    public class MyExceptionHandler(ILogger<MyExceptionHandler> logger, IProblemDetailsService problemDetailsService) : IExceptionHandler
+    public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IProblemDetailsService problemDetailsService) : IExceptionHandler
     {
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {

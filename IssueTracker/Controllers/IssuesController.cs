@@ -1,7 +1,8 @@
+using IssueTracker.Controllers.Contracts;
+using IssueTracker.Controllers.Errors;
 using IssueTracker.Services;
-using IssueTracker.Shared;
+using IssueTracker.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
-using static IssueTracker.Controllers.Contracts.Contracts;
 
 namespace IssueTracker.Controllers
 {    
@@ -63,7 +64,6 @@ namespace IssueTracker.Controllers
         [HttpGet()]
         public async Task<ActionResult<List<GetIssueResponse>>> GetAllAsync(CancellationToken cancellationToken)
         {
-            // no Result here — a list query has no business-rule failure mode, just data
             var result = await issueService.GetAllIssuesAsync(cancellationToken);
 
             var response = result.Select(issue => new GetIssueResponse
@@ -82,7 +82,6 @@ namespace IssueTracker.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<GetIssueResponse>> GetAsync(int id)
         {
-            // still plain nullable — "not found" here is absence of data, not a Result-worthy business failure
             var result = await issueService.GetByIdAsync(id);
 
             if (result is null)

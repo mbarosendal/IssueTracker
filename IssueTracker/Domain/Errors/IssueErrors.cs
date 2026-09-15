@@ -1,6 +1,6 @@
 ﻿using IssueTracker.Shared;
 
-namespace IssueTracker.Domain
+namespace IssueTracker.Domain.Errors
 {    public static class IssueErrors
     {
         public static readonly Error InvalidTitle = new("Issue.InvalidTitle", "Title is invalid.", ErrorType.Validation);

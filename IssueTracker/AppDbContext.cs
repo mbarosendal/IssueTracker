@@ -3,16 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IssueTracker
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        {
-        }
         public DbSet<Issue> Issues { get; set; }
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{
-
         //}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -1,4 +1,5 @@
-﻿using IssueTracker.Shared;
+﻿using IssueTracker.Domain.Errors;
+using IssueTracker.Shared;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection.Metadata.Ecma335;
 

@@ -1,6 +1,6 @@
 ﻿using IssueTracker.Shared;
 
-namespace IssueTracker.Controllers
+namespace IssueTracker.Controllers.Errors
 {
     public static class ErrorMapper
     {

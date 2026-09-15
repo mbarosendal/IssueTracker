@@ -1,25 +1,14 @@
 ﻿using IssueTracker.Domain;
+using IssueTracker.Domain.Errors;
 using IssueTracker.Infrastructure;
+using IssueTracker.Services.Contracts;
+using IssueTracker.Services.Errors;
 using IssueTracker.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace IssueTracker.Services
 {
-    public sealed record CreateIssueInput(string Title, string Description);
-
-    public sealed record CreateIssueOutput(
-        int Id, string Title, string Description, DateTimeOffset CreatedAt, IssueStatus Status);
-
-    public sealed record GetIssueOutput(
-        int Id, string Title, string Description, DateTimeOffset CreatedAt, DateTimeOffset? UpdatedAt, IssueStatus Status);
-
-    public sealed record UpdateIssueInput(string Title, string Description, IssueStatus Status);
-
-    public sealed record UpdateIssueOutput(
-        int Id, string Title, string Description, DateTimeOffset CreatedAt, DateTimeOffset? UpdatedAt, IssueStatus Status);
-
-
     public sealed class IssueService(IIssueRepository repository, IUnitOfWork unitOfWork) : IIssueService
     {
 
@@ -46,7 +35,7 @@ namespace IssueTracker.Services
 
             var issue = result.Value;
             repository.Add(issue);
-            await unitOfWork.SaveChangesAsync(); // populates issue.Id
+            await unitOfWork.SaveChangesAsync();
 
             var output = new CreateIssueOutput(
                 issue.Id, issue.Title, issue.Description, issue.CreatedAt, issue.Status);
@@ -93,7 +82,7 @@ namespace IssueTracker.Services
 
                 return Result<UpdateIssueOutput>.Success(output);
             }
-            catch (DbUpdateConcurrencyException ex)
+            catch (DbUpdateConcurrencyException)
             {
                 return Result<UpdateIssueOutput>.Failure(IssueServiceErrors.ConcurrencyConflict);
             }

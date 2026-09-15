@@ -1,4 +1,5 @@
-﻿using IssueTracker.Shared;
+﻿using IssueTracker.Services.Contracts;
+using IssueTracker.Shared;
 
 namespace IssueTracker.Services;
 

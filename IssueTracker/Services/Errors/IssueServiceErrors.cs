@@ -1,6 +1,6 @@
 ﻿using IssueTracker.Shared;
 
-namespace IssueTracker.Services
+namespace IssueTracker.Services.Errors
 {
     public static class IssueServiceErrors
     {
