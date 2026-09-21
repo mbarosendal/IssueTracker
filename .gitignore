@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /IssueTracker/appsettings.json
 /IssueTrackerTests/test.runsettings
 /IssueTracker/ReadMe.md
+/IssueTracker/appsettings.Development.json
