@@ -5,11 +5,13 @@ using IssueTracker.Services.Contracts;
 using IssueTracker.Services.Errors;
 using IssueTracker.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Linq.Expressions;
 
 namespace IssueTracker.Services
 {
-    public sealed class IssueService(IIssueRepository repository, IUnitOfWork unitOfWork) : IIssueService
+    public sealed class IssueService(IIssueRepository repository, IUnitOfWork unitOfWork, ILogger<IssueService> logger) : IIssueService
     {
 
         public async Task<Result> DeleteIssueAsync(int id)
@@ -82,8 +84,13 @@ namespace IssueTracker.Services
 
                 return Result<UpdateIssueOutput>.Success(output);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
+                logger.LogWarning(
+                    ex,
+                    "Concurrency conflict while updating issue {IssueId}.",
+                    id);
+
                 return Result<UpdateIssueOutput>.Failure(IssueServiceErrors.ConcurrencyConflict);
             }
         }
