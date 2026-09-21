@@ -2,6 +2,7 @@ using IssueTracker.Controllers.Contracts;
 using IssueTracker.Controllers.Errors;
 using IssueTracker.Services;
 using IssueTracker.Services.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IssueTracker.Controllers
@@ -17,6 +18,7 @@ namespace IssueTracker.Controllers
             throw new Exception("This is a test exception to demonstrate the global exception handling middleware.");
         }
 
+        [Authorize(Policy = "IssueDelete")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteAsync(int id)
         {
@@ -32,6 +34,7 @@ namespace IssueTracker.Controllers
             return NoContent(); 
         }
 
+        [Authorize(Policy = "IssueWrite")]
         [HttpPost()]
         public async Task<ActionResult<CreateIssueResponse>> CreateAsync(CreateIssueRequest request)
         {
@@ -61,6 +64,7 @@ namespace IssueTracker.Controllers
             return Created($"/issues/{response.Id}", response);
         }
 
+        [Authorize(Policy = "IssueRead")]
         [HttpGet()]
         public async Task<ActionResult<List<GetIssueResponse>>> GetAllAsync(CancellationToken cancellationToken)
         {
@@ -79,6 +83,7 @@ namespace IssueTracker.Controllers
             return Ok(response);
         }
 
+        [Authorize(Policy = "IssueRead")]
         [HttpGet("{id}")]
         public async Task<ActionResult<GetIssueResponse>> GetAsync(int id)
         {
@@ -100,6 +105,7 @@ namespace IssueTracker.Controllers
             return Ok(response);
         }
 
+        [Authorize(Policy = "IssueWrite")]
         [HttpPut("{id}")]
         public async Task<ActionResult<UpdateIssueResponse>> UpdateAsync(int id, UpdateIssueRequest request)
         {
