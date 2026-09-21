@@ -1,0 +1,27 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    ports:
+      - "1433:1433"
+
+  migrator:
+    build:
+      context: .
+      target: migrator
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=IssuesDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+    depends_on:
+      - sqlserver
+
+  api:
+    image: issuetracker-api:latest
+    environment:
+      ASPNETCORE_HTTPS_PORT: "" 
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=IssuesDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - migrator

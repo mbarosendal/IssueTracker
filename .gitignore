@@ -365,3 +365,4 @@ FodyWeavers.xsd
 /IssueTrackerTests/test.runsettings
 /IssueTracker/ReadMe.md
 /IssueTracker/appsettings.Development.json
+/.env
