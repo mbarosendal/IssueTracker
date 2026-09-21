@@ -20,7 +20,7 @@ namespace IssueTracker
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("IssueWrite", policy =>
-                    policy.RequireClaim("scope", "issues.write");
+                    policy.RequireClaim("scope", "issues.write"));
                 options.AddPolicy("IssueRead", policy =>
                     policy.RequireClaim("scope", "issues.read"));
                 options.AddPolicy("IssueDelete", policy =>
@@ -37,6 +37,9 @@ namespace IssueTracker
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
+
+            builder.Services.AddHealthChecks()
+                .AddDbContextCheck<AppDbContext>();
 
             builder.Services.AddControllers();
 
@@ -58,6 +61,7 @@ namespace IssueTracker
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHealthChecks("/health");
 
             app.Run();
         }
