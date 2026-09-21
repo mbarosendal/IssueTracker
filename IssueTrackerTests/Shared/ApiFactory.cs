@@ -14,8 +14,6 @@ namespace IssueTrackerTests.Shared;
 
 internal sealed class ApiFactory(string connectionString) : WebApplicationFactory<Program>
 {
-    private readonly string _connectionString = connectionString;
-
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureTestServices(services =>
@@ -24,7 +22,7 @@ internal sealed class ApiFactory(string connectionString) : WebApplicationFactor
             services.RemoveAll<DbContextOptions<AppDbContext>>();
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(_connectionString));
+                options.UseSqlServer(connectionString));
 
             services.Configure<JwtBearerOptions>(
                 JwtBearerDefaults.AuthenticationScheme,
