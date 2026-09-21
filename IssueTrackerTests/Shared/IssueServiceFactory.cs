@@ -18,7 +18,7 @@ namespace IssueTrackerTests.Shared
         {
             IssueRepository issueStore = new(context);
             EfUnitOfWork efUnitOfWork = new(context);
-            var logger = Mock.Of<Logger<IssueService>>();
+            var logger = Mock.Of<ILogger<IssueService>>();
             IssueService issueService = new(issueStore, efUnitOfWork, logger);
 
             return issueService;
