@@ -16,7 +16,7 @@ namespace IssueTrackerTests.Tests.Integration.Services
 
             var createdIssue = await IssueDataFactory.CreateAsync(
                 createContext,
-                "Concurrency test",
+                "testTitle",
                 "testDescription",
                 IssueStatus.Open
                 );
