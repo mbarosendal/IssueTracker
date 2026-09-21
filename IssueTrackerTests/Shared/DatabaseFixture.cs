@@ -10,7 +10,7 @@ public abstract class DatabaseFixture
 {
     private static MsSqlContainer _container = null!;
     private static Respawner _respawner = null!;
-    private static string _connectionString = null!;
+    protected static string _connectionString = null!;
 
     [ClassInitialize(InheritanceBehavior.BeforeEachDerivedClass)]
     public static async Task Initialize(TestContext context)

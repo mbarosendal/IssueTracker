@@ -10,15 +10,16 @@ using System.Threading.Tasks;
 namespace IssueTrackerTests.Tests.Integration.Controllers
 {
     [TestClass]
-    public class AuthorizationIntegrationTests
+    public class AuthorizationIntegrationTests : DatabaseFixture
     {
         private static ApiFactory _factory = null!;
         private static HttpClient _client = null!;
+        protected static string ConnectionString => _connectionString;
 
         [ClassInitialize]
         public static void Initialize(TestContext context)
         {
-            _factory = new ApiFactory();
+            _factory = new ApiFactory(_connectionString);
             _client = _factory.CreateClient();
         }
 
