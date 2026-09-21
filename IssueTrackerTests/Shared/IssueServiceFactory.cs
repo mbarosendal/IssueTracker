@@ -1,6 +1,9 @@
 ﻿using IssueTracker;
 using IssueTracker.Infrastructure;
 using IssueTracker.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +18,8 @@ namespace IssueTrackerTests.Shared
         {
             IssueRepository issueStore = new(context);
             EfUnitOfWork efUnitOfWork = new(context);
-            IssueService issueService = new(issueStore, efUnitOfWork);
+            var logger = Mock.Of<Logger<IssueService>>();
+            IssueService issueService = new(issueStore, efUnitOfWork, logger);
 
             return issueService;
         }

@@ -5,6 +5,7 @@ using IssueTracker.Services.Contracts;
 using IssueTracker.Services.Errors;
 using IssueTracker.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace IssueTrackerTests.Tests.Unit.Services
@@ -33,7 +34,9 @@ namespace IssueTrackerTests.Tests.Unit.Services
                 .Setup(x => x.SaveChangesAsync())
                 .Returns(Task.FromException(new DbUpdateConcurrencyException()));
 
-            IssueService issueService = new(storeMock.Object, unitMock.Object);
+            var loggerMock = Mock.Of<ILogger<IssueService>>();
+
+            IssueService issueService = new(storeMock.Object, unitMock.Object, loggerMock);
 
             UpdateIssueInput updateInput = new(
                 "updateTitle", 
@@ -69,7 +72,9 @@ namespace IssueTrackerTests.Tests.Unit.Services
                 .Setup(x => x.SaveChangesAsync())
                 .Returns(Task.CompletedTask);
 
-            IssueService service = new(storeMock.Object, unitMock.Object);
+            var loggerMock = Mock.Of<ILogger<IssueService>>();
+
+            IssueService service = new(storeMock.Object, unitMock.Object, loggerMock);
 
             // Act
             var result = await service.DeleteIssueAsync(123);
@@ -92,7 +97,9 @@ namespace IssueTrackerTests.Tests.Unit.Services
 
             Mock<IUnitOfWork> unitMock = new();
 
-            IssueService service = new(storeMock.Object, unitMock.Object);
+            var loggerMock = Mock.Of<ILogger<IssueService>>();
+
+            IssueService service = new(storeMock.Object, unitMock.Object, loggerMock);
 
             // Act
             var result = await service.DeleteIssueAsync(123);
@@ -125,7 +132,9 @@ namespace IssueTrackerTests.Tests.Unit.Services
                 .Setup(x => x.SaveChangesAsync())
                 .Returns(Task.FromException(new Exception()));
 
-            IssueService service = new(storeMock.Object, unitMock.Object);
+            var loggerMock = Mock.Of<ILogger<IssueService>>();
+
+            IssueService service = new(storeMock.Object, unitMock.Object, loggerMock);
 
             // Assert
             await Assert.ThrowsExceptionAsync<Exception>(
