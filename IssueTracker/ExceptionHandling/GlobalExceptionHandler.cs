@@ -7,7 +7,11 @@ namespace IssueTracker.ExceptionHandling
     {
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            logger.LogError(exception, "An unhandled exception occurred.");
+            logger.LogError(
+                exception,
+                "Unhandled exception while processing {Method} {Path}.",
+                httpContext.Request.Method,
+                httpContext.Request.Path);
 
             httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;
             int status = StatusCodes.Status500InternalServerError;
