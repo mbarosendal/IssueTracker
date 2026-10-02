@@ -16,9 +16,9 @@ namespace IssueTracker.Infrastructure
             return await _dbContext.Issues.ToListAsync(cancellationToken);
         }
 
-        public async Task<Issue?> GetByIdAsync(int id)
+        public async Task<Issue?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await _dbContext.Issues.FirstOrDefaultAsync(i => i.Id == id);
+            return await _dbContext.Issues.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
         }
 
         public void Delete(Issue issue)

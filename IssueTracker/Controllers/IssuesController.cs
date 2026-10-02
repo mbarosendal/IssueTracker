@@ -20,9 +20,9 @@ namespace IssueTracker.Controllers
 
         [Authorize(Policy = "IssueDelete")]
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteAsync(int id)
+        public async Task<ActionResult> DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var result = await issueService.DeleteIssueAsync(id);
+            var result = await issueService.DeleteIssueAsync(id, cancellationToken);
 
             if (result.IsFailure)
             {
@@ -36,11 +36,11 @@ namespace IssueTracker.Controllers
 
         [Authorize(Policy = "IssueWrite")]
         [HttpPost()]
-        public async Task<ActionResult<CreateIssueResponse>> CreateAsync(CreateIssueRequest request)
+        public async Task<ActionResult<CreateIssueResponse>> CreateAsync(CreateIssueRequest request, CancellationToken cancellationToken)
         {
             var input = new CreateIssueInput(request.Title, request.Description);
 
-            var result = await issueService.CreateIssueAsync(input);
+            var result = await issueService.CreateIssueAsync(input, cancellationToken);
 
             // as-value: no need to know WHICH error, just relay Code/Description to the client
             if (result.IsFailure)
@@ -85,9 +85,9 @@ namespace IssueTracker.Controllers
 
         [Authorize(Policy = "IssueRead")]
         [HttpGet("{id}")]
-        public async Task<ActionResult<GetIssueResponse>> GetAsync(int id)
+        public async Task<ActionResult<GetIssueResponse>> GetAsync(int id, CancellationToken cancellationToken)
         {
-            var result = await issueService.GetByIdAsync(id);
+            var result = await issueService.GetByIdAsync(id, cancellationToken);
 
             if (result is null)
                 return NotFound();
@@ -107,11 +107,11 @@ namespace IssueTracker.Controllers
 
         [Authorize(Policy = "IssueWrite")]
         [HttpPut("{id}")]
-        public async Task<ActionResult<UpdateIssueResponse>> UpdateAsync(int id, UpdateIssueRequest request)
+        public async Task<ActionResult<UpdateIssueResponse>> UpdateAsync(int id, UpdateIssueRequest request, CancellationToken cancellationToken)
         {
             var input = new UpdateIssueInput(request.Title, request.Description, request.Status);
 
-            var result = await issueService.UpdateIssueAsync(id, input);
+            var result = await issueService.UpdateIssueAsync(id, input, cancellationToken);
 
             if (result.IsFailure)
             {

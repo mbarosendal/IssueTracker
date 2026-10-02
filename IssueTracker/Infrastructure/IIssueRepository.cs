@@ -6,7 +6,7 @@ namespace IssueTracker.Infrastructure
     {
         void Add(Issue issue);
         Task<List<Issue>> GetAllAsync(CancellationToken cancellationToken);
-        Task<Issue?> GetByIdAsync(int id);
+        Task<Issue?> GetByIdAsync(int id, CancellationToken cancellationToken);
         void Delete(Issue issue);
 
     }

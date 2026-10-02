@@ -14,21 +14,21 @@ namespace IssueTracker.Services
     public sealed class IssueService(IIssueRepository repository, IUnitOfWork unitOfWork, ILogger<IssueService> logger) : IIssueService
     {
 
-        public async Task<Result> DeleteIssueAsync(int id)
+        public async Task<Result> DeleteIssueAsync(int id, CancellationToken cancellationToken)
         {
-            var issue = await repository.GetByIdAsync(id);
+            var issue = await repository.GetByIdAsync(id, cancellationToken);
 
             if (issue is null)
                 return Result.Failure(IssueErrors.NotFound(id));
 
             repository.Delete(issue);
 
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Result.Success();
         }
 
-        public async Task<Result<CreateIssueOutput>> CreateIssueAsync(CreateIssueInput request)
+        public async Task<Result<CreateIssueOutput>> CreateIssueAsync(CreateIssueInput request, CancellationToken cancellationToken)
         {
             var result = Issue.Create(request.Title, request.Description, IssueStatus.Open);
 
@@ -37,7 +37,7 @@ namespace IssueTracker.Services
 
             var issue = result.Value;
             repository.Add(issue);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             var output = new CreateIssueOutput(
                 issue.Id, issue.Title, issue.Description, issue.CreatedAt, issue.Status);
@@ -54,9 +54,9 @@ namespace IssueTracker.Services
                 .ToList();
         }
 
-        public async Task<GetIssueOutput?> GetByIdAsync(int id)
+        public async Task<GetIssueOutput?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            var issue = await repository.GetByIdAsync(id);
+            var issue = await repository.GetByIdAsync(id, cancellationToken);
 
             if (issue is null)
                 return null;
@@ -65,10 +65,10 @@ namespace IssueTracker.Services
                 issue.Id, issue.Title, issue.Description, issue.CreatedAt, issue.UpdatedAt, issue.Status);
         }
 
-        public async Task<Result<UpdateIssueOutput>> UpdateIssueAsync(int id, UpdateIssueInput request)
+        public async Task<Result<UpdateIssueOutput>> UpdateIssueAsync(int id, UpdateIssueInput request, CancellationToken cancellationToken)
         {
  
-                var issue = await repository.GetByIdAsync(id);
+                var issue = await repository.GetByIdAsync(id, cancellationToken);
                 if (issue is null)
                     return Result<UpdateIssueOutput>.Failure(IssueErrors.NotFound(id));
 
@@ -78,7 +78,7 @@ namespace IssueTracker.Services
 
             try
             {
-                await unitOfWork.SaveChangesAsync();
+                await unitOfWork.SaveChangesAsync(cancellationToken);
                 var output = new UpdateIssueOutput(
                     issue.Id, issue.Title, issue.Description, issue.CreatedAt, issue.UpdatedAt, issue.Status);
 
