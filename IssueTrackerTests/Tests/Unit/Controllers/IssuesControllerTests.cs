@@ -24,7 +24,8 @@ namespace IssueTrackerTests.Tests.Unit.Controllers
             issueServiceMock
                 .Setup(x => x.UpdateIssueAsync(
                     123,
-                    It.IsAny<UpdateIssueInput>()))
+                    It.IsAny<UpdateIssueInput>(),
+                    CancellationToken.None))
                 .ReturnsAsync(Result<UpdateIssueOutput>.Failure(concurrencyError));
 
             var controller = new IssuesController(issueServiceMock.Object);
@@ -37,7 +38,7 @@ namespace IssueTrackerTests.Tests.Unit.Controllers
             };
 
             // Act
-            var result = await controller.UpdateAsync(123, request);
+            var result = await controller.UpdateAsync(123, request, CancellationToken.None);
 
             // Assert
             var objectResult = result.Result as ObjectResult;

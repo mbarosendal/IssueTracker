@@ -63,7 +63,7 @@ namespace IssueTrackerTests.Tests.Integration.Services
                 IssueStatus.InProgress);
 
             //Act
-            var updateResult = await service.UpdateIssueAsync(createdIssue.Id, updateRequest);
+            var updateResult = await service.UpdateIssueAsync(createdIssue.Id, updateRequest, CancellationToken.None);
             Assert.IsTrue(updateResult.IsSuccess);
 
             //Assert
@@ -127,7 +127,7 @@ namespace IssueTrackerTests.Tests.Integration.Services
             var service = IssueServiceFactory.CreateIssueService(readContext);
 
             //Act
-            var readResult = await service.GetByIdAsync(createdIssue.Id);
+            var readResult = await service.GetByIdAsync(createdIssue.Id, CancellationToken.None);
 
             //Assert
             Assert.IsNotNull(readResult);
@@ -153,7 +153,7 @@ namespace IssueTrackerTests.Tests.Integration.Services
             var service = IssueServiceFactory.CreateIssueService(deleteContext);
 
             // Act
-            var deleteResult = await service.DeleteIssueAsync(createdIssue.Id);
+            var deleteResult = await service.DeleteIssueAsync(createdIssue.Id, CancellationToken.None);
 
             // Assert
             await using var verificationContext = CreateContext();
@@ -180,7 +180,7 @@ namespace IssueTrackerTests.Tests.Integration.Services
                 );
 
             // Act
-            await service.CreateIssueAsync(issue);
+            await service.CreateIssueAsync(issue, CancellationToken.None);
 
             // Assert
             await using var verificationContext = CreateContext();

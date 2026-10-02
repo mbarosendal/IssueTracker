@@ -26,12 +26,12 @@ namespace IssueTrackerTests.Tests.Unit.Services
 
             Mock<IIssueRepository> storeMock = new();
             storeMock
-                .Setup(x => x.GetByIdAsync(123))
+                .Setup(x => x.GetByIdAsync(123, CancellationToken.None))
                 .ReturnsAsync(issue);
 
             Mock<IUnitOfWork> unitMock = new();
             unitMock
-                .Setup(x => x.SaveChangesAsync())
+                .Setup(x => x.SaveChangesAsync(CancellationToken.None))
                 .Returns(Task.FromException(new DbUpdateConcurrencyException()));
 
             var loggerMock = Mock.Of<ILogger<IssueService>>();
@@ -44,7 +44,7 @@ namespace IssueTrackerTests.Tests.Unit.Services
                 IssueStatus.InProgress);
 
             // Act
-            var updateResult = await issueService.UpdateIssueAsync(123, updateInput);
+            var updateResult = await issueService.UpdateIssueAsync(123, updateInput, CancellationToken.None);
 
             // Assert
             Assert.IsTrue(updateResult.IsFailure);
@@ -65,11 +65,11 @@ namespace IssueTrackerTests.Tests.Unit.Services
 
             Mock<IIssueRepository> storeMock = new();
             storeMock
-                .Setup(x => x.GetByIdAsync(123))
+                .Setup(x => x.GetByIdAsync(123, CancellationToken.None))
                 .ReturnsAsync(issue);
             Mock<IUnitOfWork> unitMock = new();
             unitMock
-                .Setup(x => x.SaveChangesAsync())
+                .Setup(x => x.SaveChangesAsync(CancellationToken.None))
                 .Returns(Task.CompletedTask);
 
             var loggerMock = Mock.Of<ILogger<IssueService>>();
@@ -77,12 +77,12 @@ namespace IssueTrackerTests.Tests.Unit.Services
             IssueService service = new(storeMock.Object, unitMock.Object, loggerMock);
 
             // Act
-            var result = await service.DeleteIssueAsync(123);
+            var result = await service.DeleteIssueAsync(123, CancellationToken.None);
 
             // Assert
-            storeMock.Verify(x => x.GetByIdAsync(123), Times.Once());
+            storeMock.Verify(x => x.GetByIdAsync(123, CancellationToken.None), Times.Once());
             storeMock.Verify(x => x.Delete(issue), Times.Once());
-            unitMock.Verify(x => x.SaveChangesAsync(), Times.Once());
+            unitMock.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Once());
             Assert.IsTrue(result.IsSuccess);
         }
 
@@ -92,7 +92,7 @@ namespace IssueTrackerTests.Tests.Unit.Services
             // Arrange
             Mock<IIssueRepository> storeMock = new();
             storeMock
-                .Setup(x => x.GetByIdAsync(123))
+                .Setup(x => x.GetByIdAsync(123, CancellationToken.None))
                 .ReturnsAsync((Issue?)null);
 
             Mock<IUnitOfWork> unitMock = new();
@@ -102,11 +102,11 @@ namespace IssueTrackerTests.Tests.Unit.Services
             IssueService service = new(storeMock.Object, unitMock.Object, loggerMock);
 
             // Act
-            var result = await service.DeleteIssueAsync(123);
+            var result = await service.DeleteIssueAsync(123, CancellationToken.None);
 
             // Assert
-            storeMock.Verify(x => x.GetByIdAsync(123), Times.Once());
-            unitMock.Verify(x => x.SaveChangesAsync(), Times.Never());
+            storeMock.Verify(x => x.GetByIdAsync(123, CancellationToken.None), Times.Once());
+            unitMock.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Never());
             Assert.IsTrue(result.IsFailure);
             Assert.AreEqual(ErrorType.NotFound, result.Error.Type);
         }
@@ -124,12 +124,12 @@ namespace IssueTrackerTests.Tests.Unit.Services
 
             Mock<IIssueRepository> storeMock = new();
             storeMock
-                .Setup(x => x.GetByIdAsync(123))
+                .Setup(x => x.GetByIdAsync(123, CancellationToken.None))
                 .ReturnsAsync(issue);
 
             Mock<IUnitOfWork> unitMock = new();
             unitMock
-                .Setup(x => x.SaveChangesAsync())
+                .Setup(x => x.SaveChangesAsync(CancellationToken.None))
                 .Returns(Task.FromException(new Exception()));
 
             var loggerMock = Mock.Of<ILogger<IssueService>>();
@@ -138,10 +138,10 @@ namespace IssueTrackerTests.Tests.Unit.Services
 
             // Assert
             await Assert.ThrowsExceptionAsync<Exception>(
-                () => service.DeleteIssueAsync(123));
+                () => service.DeleteIssueAsync(123, CancellationToken.None));
 
-            storeMock.Verify(x => x.GetByIdAsync(123), Times.Once());
-            unitMock.Verify(x => x.SaveChangesAsync(), Times.Once());
+            storeMock.Verify(x => x.GetByIdAsync(123, CancellationToken.None), Times.Once());
+            unitMock.Verify(x => x.SaveChangesAsync(CancellationToken.None), Times.Once());
         }
     }
 }
