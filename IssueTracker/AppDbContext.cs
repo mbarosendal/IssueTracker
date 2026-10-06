@@ -6,6 +6,7 @@ namespace IssueTracker
     public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
     {
         public DbSet<Issue> Issues { get; set; }
+        public DbSet<Comment> Comments { get; set; }
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         //{

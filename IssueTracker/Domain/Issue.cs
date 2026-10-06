@@ -21,6 +21,7 @@ namespace IssueTracker.Domain
         public DateTimeOffset CreatedAt { get; private set; }
         public DateTimeOffset? UpdatedAt { get; private set; }
         public IssueStatus Status { get; private set; }
+        public ICollection<Comment> Comments { get; private set; } = [];
         public byte[] RowVersion { get; private set; } = [];
 
 
