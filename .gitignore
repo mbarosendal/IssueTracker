@@ -366,3 +366,4 @@ FodyWeavers.xsd
 /IssueTracker/ReadMe.md
 /IssueTracker/appsettings.Development.json
 /.env
+/SQLQueries
