@@ -1,4 +1,5 @@
 using IssueTracker.ExceptionHandling;
+using IssueTracker.Experiments;
 using IssueTracker.Infrastructure;
 using IssueTracker.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,7 +11,7 @@ namespace IssueTracker
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +35,11 @@ namespace IssueTracker
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(
-                    builder
-                    .Configuration.GetConnectionString("DefaultConnection")));
+                        builder
+                            .Configuration.GetConnectionString("DefaultConnection"))
+                            .LogTo(Console.WriteLine, LogLevel.Information)
+                            .EnableSensitiveDataLogging()
+            );
 
             builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
             builder.Services.AddProblemDetails();
@@ -60,7 +64,6 @@ namespace IssueTracker
                 });
             }
 
-
             app.UseExceptionHandler();
 
             app.UseHttpsRedirection();
@@ -70,6 +73,9 @@ namespace IssueTracker
 
             app.MapControllers();
             app.MapHealthChecks("/health");
+
+            // Execute experiments
+            await Experiment.RunNPlusOneExperiment(app.Services);
 
             app.Run();
         }
