@@ -13,7 +13,9 @@ namespace IssueTracker.Infrastructure
 
         public async Task<List<Issue>> GetAllAsync(CancellationToken cancellationToken)
         {
-            return await _dbContext.Issues.ToListAsync(cancellationToken);
+            return await _dbContext.Issues
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
 
         public async Task<Issue?> GetByIdAsync(int id, CancellationToken cancellationToken)
