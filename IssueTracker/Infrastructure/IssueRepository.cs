@@ -11,16 +11,16 @@ namespace IssueTracker.Infrastructure
             _dbContext.Add(issue);
         }
 
-        public async Task<List<Issue>> GetAllAsync(CancellationToken cancellationToken)
+        public Task<List<Issue>> GetAllAsync(CancellationToken cancellationToken)
         {
-            return await _dbContext.Issues
+            return _dbContext.Issues
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<Issue?> GetByIdAsync(int id, CancellationToken cancellationToken)
+        public Task<Issue?> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
-            return await _dbContext.Issues.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+            return _dbContext.Issues.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
         }
 
         public void Delete(Issue issue)
